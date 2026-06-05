@@ -2,6 +2,12 @@
 
 ## Bridge 未连接
 
+如果扩展 popup 显示 Bridge 未连接，常见原因是：
+
+1. Bridge 没有运行。
+2. 运行 Bridge 的终端窗口被关闭。
+3. 端口 `17321` 被阻塞或占用。
+
 启动 Bridge：
 
 ```bash
@@ -13,6 +19,8 @@ pnpm dev:bridge
 ```bash
 curl http://127.0.0.1:17321/health
 ```
+
+然后重新打开 popup。
 
 ## 端口 `17321` 已被占用
 
@@ -34,12 +42,34 @@ pnpm dev:bridge -- config set-project /path/to/your/codex/project
 
 ## 当前页面不是 ChatGPT
 
-这是 Milestone 2 和 Milestone 3 中 extension flow 的提示。请打开以下地址下的对话：
+Milestone 2 只允许在 ChatGPT 页面上使用 Send to Codex。请打开：
 
 ```text
-https://chatgpt.com/c/<id>
-https://chat.openai.com/c/<id>
+https://chatgpt.com
 ```
+
+然后重新打开 popup。
+
+## Send to Codex 按钮不可点击
+
+可能原因：
+
+1. Bridge 未连接。
+2. Bridge 状态仍在检查。
+3. 当前页面不是 ChatGPT。
+4. 发送请求正在进行中。
+
+请查看 popup 中的状态提示。
+
+## 语言没有保留
+
+可能原因：
+
+1. 浏览器阻止了扩展 storage。
+2. 扩展被重新加载。
+3. storage 写入失败。
+
+请重新加载扩展并再次切换语言。
 
 ## 未检测到消息
 
@@ -63,10 +93,28 @@ http://127.0.0.1:17321
 
 ## 扩展无法加载
 
-扩展会在 Milestone 2 实现。完成后先构建：
+先构建：
 
 ```bash
 pnpm build:extension
 ```
 
 然后在 `chrome://extensions` 中加载 `apps/extension/dist`。
+
+请确认选择的是 `apps/extension/dist`，不是 `apps/extension`。
+
+## 扩展构建产物缺少 `manifest.json`
+
+运行：
+
+```bash
+pnpm build:extension
+```
+
+然后检查：
+
+```text
+apps/extension/dist/manifest.json
+```
+
+如果缺失，请检查 `apps/extension/vite.config.ts` 中的 Vite manifest copy plugin。

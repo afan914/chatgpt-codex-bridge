@@ -4,12 +4,12 @@
 
 You will set up two local pieces:
 
-- The browser extension reads your current ChatGPT conversation.
+- The browser extension popup checks ChatGPT pages and sends a mock conversation payload.
 - The local Bridge runs on your computer.
 - The Bridge writes the conversation context into your Codex project folder.
 - Nothing is uploaded to a remote server by this tool.
 
-Milestone 1 sets up the local Bridge. The browser button arrives in Milestone 2.
+Milestone 2 includes the local Bridge and the browser extension popup. Real ChatGPT conversation extraction will arrive in Milestone 3.
 
 ## Step 1: Install Node.js
 
@@ -118,11 +118,13 @@ Open a new Terminal window and run:
 pnpm build:extension
 ```
 
-In Milestone 1 this command is only a placeholder. In Milestone 2 it will build the browser extension.
+This creates the browser extension files under:
+
+```text
+apps/extension/dist
+```
 
 ## Step 8: Load the extension in Atlas / Chrome / Arc
-
-This step is available after Milestone 2.
 
 1. Open your browser.
 2. Go to:
@@ -145,16 +147,22 @@ After Milestone 2:
 
 1. Open a ChatGPT conversation.
 2. Click the extension icon.
-3. Confirm Bridge connected and ChatGPT conversation detected.
-4. Click "Send to Codex".
-5. Open your Codex project folder.
-6. Check that this folder exists:
+3. Confirm:
+
+   * Bridge connected
+   * ChatGPT page detected
+4. Switch language if needed.
+5. Click "Send to Codex".
+6. Open your configured Codex project folder.
+7. Check that this folder exists:
 
 ```text
 .codex-context/chatgpt/
 ```
 
-For Milestone 1, you can test the Bridge with:
+At this stage, Send to Codex uses a mock conversation payload. This verifies that the extension can talk to the local Bridge. In the next milestone, the extension will extract the real ChatGPT conversation.
+
+You can also test the Bridge directly with:
 
 ```bash
 curl -X POST http://127.0.0.1:17321/import-chatgpt-context \

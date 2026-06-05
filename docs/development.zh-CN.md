@@ -18,7 +18,7 @@ pnpm typecheck
 pnpm lint
 ```
 
-Milestone 1 中 extension 的 build 和 lint 还是占位命令，会在 Milestone 2 变成真实实现。
+Milestone 2 中 extension 的 build 和 lint 命令已经是真实实现。
 
 ## 以开发模式运行 Bridge
 
@@ -42,8 +42,6 @@ pnpm dev:bridge
 
 ## 构建扩展
 
-Milestone 1 只包含 extension workspace 占位。Milestone 2 后会支持：
-
 ```bash
 pnpm build:extension
 ```
@@ -52,12 +50,59 @@ pnpm build:extension
 
 ## 加载未打包扩展
 
-Milestone 2 后可用：
-
 1. 打开 `chrome://extensions`。
 2. 打开 Developer mode。
 3. 点击 “Load unpacked”。
 4. 选择 `apps/extension/dist`。
+
+## 从 Popup 测试 Bridge 健康状态
+
+1. 启动 Bridge：
+
+```bash
+pnpm dev:bridge
+```
+
+2. 打开扩展 popup。
+3. 确认 Bridge 已连接。
+
+## 测试未连接状态
+
+1. 停止 Bridge。
+2. 重新打开 popup。
+3. 确认显示 Bridge 未连接。
+
+## 使用 Mock Payload 测试 Send to Codex
+
+1. 启动 Bridge。
+2. 打开 ChatGPT 页面。
+3. 打开 popup。
+4. 点击 Send to Codex。
+5. 确认文件出现在：
+
+```text
+<project-root>/.codex-context/chatgpt/
+```
+
+Milestone 2 发送的是 mock payload。真实 ChatGPT DOM 提取会在 Milestone 3 实现。
+
+## 测试 i18n
+
+1. 打开 popup。
+2. 切换 EN / 中文。
+3. 关闭 popup。
+4. 重新打开 popup。
+5. 确认语言选择被保留。
+
+## 检查 Vite 构建产物
+
+执行 `pnpm build:extension` 后确认：
+
+```text
+apps/extension/dist/manifest.json
+apps/extension/dist/popup.html
+apps/extension/dist/serviceWorker.js
+```
 
 ## Mock Payload 测试
 

@@ -18,7 +18,7 @@ pnpm typecheck
 pnpm lint
 ```
 
-Extension build and lint scripts are placeholders in Milestone 1 and become real in Milestone 2.
+Extension build and lint scripts are implemented in Milestone 2.
 
 ## Run Bridge in Dev Mode
 
@@ -42,22 +42,71 @@ pnpm dev:bridge
 
 ## Build Extension
 
-Milestone 1 contains only an extension workspace placeholder. In Milestone 2:
-
 ```bash
 pnpm build:extension
 ```
 
-will create `apps/extension/dist`.
+Expected output:
+
+```text
+apps/extension/dist/
+```
 
 ## Load Unpacked Extension
-
-This is available after Milestone 2:
 
 1. Open `chrome://extensions`.
 2. Turn on Developer mode.
 3. Click "Load unpacked".
 4. Select `apps/extension/dist`.
+
+## Test Bridge Health from Popup
+
+1. Start Bridge:
+
+```bash
+pnpm dev:bridge
+```
+
+2. Open the extension popup.
+3. Confirm Bridge connected.
+
+## Test Disconnected State
+
+1. Stop Bridge.
+2. Reopen the popup.
+3. Confirm Bridge disconnected.
+
+## Test Send to Codex with Mock Payload
+
+1. Start Bridge.
+2. Open a ChatGPT page.
+3. Open the popup.
+4. Click Send to Codex.
+5. Confirm files appear in:
+
+```text
+<project-root>/.codex-context/chatgpt/
+```
+
+Milestone 2 sends a mock payload. Real ChatGPT DOM extraction starts in Milestone 3.
+
+## Test i18n
+
+1. Open the popup.
+2. Switch EN / 中文.
+3. Close the popup.
+4. Reopen the popup.
+5. Confirm the selected language persists.
+
+## Test Vite Build Output
+
+After `pnpm build:extension`, confirm these files exist:
+
+```text
+apps/extension/dist/manifest.json
+apps/extension/dist/popup.html
+apps/extension/dist/serviceWorker.js
+```
 
 ## Mock Payload Test
 

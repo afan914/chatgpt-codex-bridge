@@ -4,11 +4,20 @@ ChatGPT Context Bridge for Codex 是一个本地优先的工具，用来把 Chat
 
 它解决的问题很直接：你可能在 ChatGPT 里讨论产品想法、需求、技术方案和实现细节，然后切换到 Codex App 开始开发。但 Codex App 默认不知道前面 ChatGPT 对话里发生了什么。这个项目的 MVP 目标，就是用一个浏览器扩展和一个本地 Bridge CLI，把这段上下文自动交给 Codex。
 
+当前项目包含本地 Bridge CLI、Manifest V3 浏览器扩展弹窗、mock Send to Codex 流程、英文 / 中文运行时切换，以及本地优先架构。
+
+## 当前状态
+
+Milestone 1：Bridge core 已实现。
+Milestone 2：带 mock payload 和 i18n 的扩展弹窗已实现。
+Milestone 3：真实 ChatGPT DOM 提取尚未实现。
+Milestone 4：真实资源提取尚未实现。
+
 ## 架构概览
 
 项目分为三层职责：
 
-- 浏览器扩展：读取当前 ChatGPT 对话页，把上下文发送给本地 Bridge。该部分从 Milestone 2 开始实现。
+- 浏览器扩展：展示 popup，检查 Bridge 健康状态，通过 URL 检测 ChatGPT 页面，支持 EN / 中文切换，并向本地 Bridge 发送 mock payload。
 - 本地 Bridge CLI：运行在 `127.0.0.1:17321`，校验 payload，并把上下文文件写入配置好的 Codex 项目目录。
 - Shared package：维护共享 TypeScript 类型、payload 校验、slug 生成、文件名清洗、URL 工具和弹窗 i18n 工具。
 
@@ -38,6 +47,12 @@ pnpm dev:bridge -- config set-project /path/to/your/codex/project
 
 ```bash
 pnpm dev:bridge
+```
+
+构建扩展：
+
+```bash
+pnpm build:extension
 ```
 
 测试健康检查：
@@ -88,20 +103,31 @@ pnpm dev:bridge -- config set-project /path/to/project
 
 ## 加载浏览器扩展
 
-浏览器扩展会在 Milestone 2 实现。Milestone 1 只包含 extension workspace 占位。
-
-Milestone 2 完成后，预期构建方式是：
-
 ```bash
 pnpm build:extension
 ```
 
-然后在 `chrome://extensions` 里通过“加载已解压的扩展程序”选择 `apps/extension/dist`。
+然后：
+
+1. 打开 `chrome://extensions`。
+2. 启用 Developer mode。
+3. 点击 Load unpacked。
+4. 选择 `apps/extension/dist`。
+
+## 使用弹窗
+
+1. 用 `pnpm dev:bridge` 启动 Bridge。
+2. 在 Atlas / Chromium 中打开 ChatGPT。
+3. 打开扩展弹窗。
+4. 确认 Bridge 已连接。
+5. 确认已检测到 ChatGPT 页面。
+6. 如有需要，切换 EN / 中文。
+7. 点击 Send to Codex。
+8. 检查 `<project-root>/.codex-context/chatgpt/`。
 
 ## 当前限制
 
-- Milestone 1 只实现 Bridge core 和 shared package。
-- 扩展弹窗会在 Milestone 2 实现。
+- Milestone 2 仍使用 mock payload，尚未提取真实 ChatGPT 对话 DOM。
 - 真实 ChatGPT DOM 提取会在 Milestone 3 实现。
 - 图片和文件提取在 MVP 中先记录为 unresolved asset references。
 - 重复导入同一对话时，会覆盖确定性的 conversation folder。

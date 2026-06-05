@@ -4,11 +4,20 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "echo \"Extension build is implemented in Milestone 2\"",
-    "typecheck": "echo \"Extension typecheck is implemented in Milestone 2\"",
-    "lint": "echo \"Extension lint is implemented in Milestone 2\""
+    "build": "vite build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@chatgpt-codex-bridge/shared": "workspace:*"
+    "@chatgpt-codex-bridge/shared": "workspace:*",
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.3.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0"
   }
 }

@@ -2,6 +2,12 @@
 
 ## Bridge Disconnected
 
+If the extension popup says Bridge disconnected, common causes are:
+
+1. Bridge is not running.
+2. The Terminal window running Bridge was closed.
+3. Port `17321` is blocked or occupied.
+
 Start the Bridge:
 
 ```bash
@@ -13,6 +19,8 @@ Then test:
 ```bash
 curl http://127.0.0.1:17321/health
 ```
+
+Then reopen the popup.
 
 ## Port `17321` Already in Use
 
@@ -34,12 +42,34 @@ pnpm dev:bridge -- config set-project /path/to/your/codex/project
 
 ## Current Page Is Not ChatGPT
 
-This message belongs to the extension flow in Milestone 2 and 3. Open a conversation under:
+Milestone 2 only enables Send to Codex on ChatGPT pages. Open:
 
 ```text
-https://chatgpt.com/c/<id>
-https://chat.openai.com/c/<id>
+https://chatgpt.com
 ```
+
+Then reopen the popup.
+
+## Send to Codex Button Is Disabled
+
+Possible causes:
+
+1. Bridge disconnected.
+2. Bridge status is still checking.
+3. Current page is not ChatGPT.
+4. Send request is already in progress.
+
+Check the status messages in the popup.
+
+## Language Does Not Persist
+
+Possible causes:
+
+1. Browser blocked extension storage.
+2. Extension was reloaded.
+3. Storage write failed.
+
+Reload the extension and switch language again.
 
 ## No Messages Detected
 
@@ -63,10 +93,28 @@ http://127.0.0.1:17321
 
 ## Extension Cannot Be Loaded
 
-The extension is implemented in Milestone 2. After that milestone, build it with:
+Build it with:
 
 ```bash
 pnpm build:extension
 ```
 
 Then load `apps/extension/dist` from `chrome://extensions`.
+
+Make sure you selected `apps/extension/dist`, not `apps/extension`.
+
+## Extension Build Output Missing `manifest.json`
+
+Run:
+
+```bash
+pnpm build:extension
+```
+
+Then check:
+
+```text
+apps/extension/dist/manifest.json
+```
+
+If it is missing, inspect the Vite manifest copy plugin in `apps/extension/vite.config.ts`.

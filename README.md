@@ -4,11 +4,20 @@ ChatGPT Context Bridge for Codex is a local-first project for moving the context
 
 It exists because a user may plan, discuss, and refine implementation details in ChatGPT, then use Codex App to build the actual project. The MVP closes that context gap without manual copying, exporting, downloading, or cloud sync.
 
+The project now includes a local Bridge CLI, a Manifest V3 browser extension popup, a mock Send to Codex flow, runtime English / Chinese switching, and a local-only architecture.
+
+## Current Status
+
+Milestone 1: Bridge core is implemented.
+Milestone 2: Extension popup with mock payload and i18n is implemented.
+Milestone 3: Real ChatGPT DOM extraction is not implemented yet.
+Milestone 4: Real asset extraction is not implemented yet.
+
 ## Architecture
 
 The project is split into three responsibilities:
 
-- Browser extension: reads the current ChatGPT conversation page and sends a payload to the local Bridge. This starts in Milestone 2.
+- Browser extension: shows a popup, checks Bridge health, detects ChatGPT pages by URL, switches EN / 中文 at runtime, and sends a mock payload to the local Bridge.
 - Local Bridge CLI: runs on `127.0.0.1:17321`, validates payloads, and writes context files into a configured Codex project directory.
 - Shared package: owns shared TypeScript types, validation, slug helpers, filename helpers, URL helpers, and popup i18n helpers.
 
@@ -38,6 +47,12 @@ Start the Bridge:
 
 ```bash
 pnpm dev:bridge
+```
+
+Build the extension:
+
+```bash
+pnpm build:extension
 ```
 
 Test health:
@@ -88,20 +103,31 @@ pnpm dev:bridge -- config set-project /path/to/project
 
 ## Loading the Extension
 
-The browser extension is planned for Milestone 2. Milestone 1 includes an extension workspace placeholder only.
-
-After Milestone 2, the expected flow will be:
-
 ```bash
 pnpm build:extension
 ```
 
-Then load `apps/extension/dist` from `chrome://extensions` using "Load unpacked".
+Then:
+
+1. Open `chrome://extensions`.
+2. Enable Developer mode.
+3. Click Load unpacked.
+4. Select `apps/extension/dist`.
+
+## Using the Popup
+
+1. Start the Bridge with `pnpm dev:bridge`.
+2. Open ChatGPT in Atlas / Chromium.
+3. Open the extension popup.
+4. Confirm Bridge connected.
+5. Confirm ChatGPT page detected.
+6. Switch EN / 中文 if needed.
+7. Click Send to Codex.
+8. Check `<project-root>/.codex-context/chatgpt/`.
 
 ## Current Limitations
 
-- Milestone 1 implements the Bridge core and shared package only.
-- The extension popup is not implemented until Milestone 2.
+- Milestone 2 still uses a mock payload. It does not yet extract the real ChatGPT conversation DOM.
 - Real ChatGPT DOM extraction is not implemented until Milestone 3.
 - Image and file extraction are represented as unresolved asset references in the MVP.
 - Duplicate imports overwrite the deterministic conversation folder.
