@@ -51,18 +51,22 @@ pnpm --version
 
 ### 方式 A：从 GitHub 下载 ZIP
 
-在 GitHub 上点击绿色的 “Code” 按钮，选择 “Download ZIP”，然后解压。打开终端并进入解压后的文件夹。
+打开：
+
+```text
+https://github.com/afan914/chatgpt-codex-bridge
+```
+
+点击绿色的 “Code” 按钮，选择 “Download ZIP”，然后解压。打开终端并进入解压后的文件夹。
 
 ### 方式 B：使用 git clone
 
 如果你已经安装 Git：
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/afan914/chatgpt-codex-bridge.git
 cd chatgpt-codex-bridge
 ```
-
-把 `<repo-url>` 替换为项目仓库地址。
 
 ## 第 4 步：安装项目依赖
 

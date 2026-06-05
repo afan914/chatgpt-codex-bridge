@@ -51,18 +51,22 @@ If this fails, Node.js or npm may not be installed correctly.
 
 ### Option A: Download ZIP from GitHub
 
-On GitHub, click the green "Code" button, choose "Download ZIP", then unzip it. Open Terminal and move into the unzipped folder.
+Open:
+
+```text
+https://github.com/afan914/chatgpt-codex-bridge
+```
+
+Click the green "Code" button, choose "Download ZIP", then unzip it. Open Terminal and move into the unzipped folder.
 
 ### Option B: Use git clone
 
 For users who already have Git:
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/afan914/chatgpt-codex-bridge.git
 cd chatgpt-codex-bridge
 ```
-
-Replace `<repo-url>` with the project repository URL.
 
 ## Step 4: Install project dependencies
 
