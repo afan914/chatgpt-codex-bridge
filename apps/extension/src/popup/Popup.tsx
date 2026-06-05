@@ -109,9 +109,12 @@ export function Popup(): JSX.Element {
         {currentTab.status === "loading" && <StatusBadge status="neutral">{t(locale, "loadingCurrentTab")}</StatusBadge>}
         {currentTab.status === "error" && <StatusBadge status="error">{currentTab.message}</StatusBadge>}
         {currentTab.status === "ready" && (
-          <StatusBadge status={currentTab.isChatGPTPage ? "success" : "warning"}>
-            {currentTab.isChatGPTPage ? t(locale, "chatgptDetected") : t(locale, "notChatgptPage")}
-          </StatusBadge>
+          <div className="stack">
+            <StatusBadge status={currentTab.isChatGPTPage ? "success" : "warning"}>
+              {currentTab.isChatGPTPage ? t(locale, "chatgptDetected") : t(locale, "notChatgptPage")}
+            </StatusBadge>
+            {currentTab.url && <span className="meta">{t(locale, "currentTabUrl")}: {currentTab.url}</span>}
+          </div>
         )}
       </section>
 
