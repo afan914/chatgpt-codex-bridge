@@ -1,5 +1,7 @@
 # ChatGPT Context Bridge for Codex
 
+[English](README.md) | [中文](README.zh-CN.md)
+
 ChatGPT Context Bridge for Codex is a local-first project for moving the context of a ChatGPT conversation into a Codex project directory.
 
 It exists because a user may plan, discuss, and refine implementation details in ChatGPT, then use Codex App to build the actual project. The MVP closes that context gap without manual copying, exporting, downloading, or cloud sync.
@@ -24,6 +26,21 @@ The project is split into three responsibilities:
 The Bridge never extracts browser DOM directly, never calls private ChatGPT APIs, and never uploads conversation content to a remote service.
 
 ## Quick Start
+
+Clone this repository:
+
+```bash
+git clone https://github.com/afan914/chatgpt-codex-bridge.git
+cd chatgpt-codex-bridge
+```
+
+Or download it from GitHub:
+
+```text
+https://github.com/afan914/chatgpt-codex-bridge
+```
+
+Click Code -> Download ZIP, unzip it, then open Terminal in the unzipped project folder.
 
 Install dependencies:
 

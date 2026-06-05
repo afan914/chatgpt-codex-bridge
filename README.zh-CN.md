@@ -1,5 +1,7 @@
 # ChatGPT Context Bridge for Codex
 
+[English](README.md) | [中文](README.zh-CN.md)
+
 ChatGPT Context Bridge for Codex 是一个本地优先的工具，用来把 ChatGPT 对话上下文写入 Codex 项目目录。
 
 它解决的问题很直接：你可能在 ChatGPT 里讨论产品想法、需求、技术方案和实现细节，然后切换到 Codex App 开始开发。但 Codex App 默认不知道前面 ChatGPT 对话里发生了什么。这个项目的 MVP 目标，就是用一个浏览器扩展和一个本地 Bridge CLI，把这段上下文自动交给 Codex。
@@ -24,6 +26,21 @@ Milestone 4：真实资源提取尚未实现。
 Bridge 不直接解析浏览器 DOM，不调用 ChatGPT 私有 API，也不会把对话内容上传到远程服务。
 
 ## 快速开始
+
+克隆这个仓库：
+
+```bash
+git clone https://github.com/afan914/chatgpt-codex-bridge.git
+cd chatgpt-codex-bridge
+```
+
+或者从 GitHub 下载：
+
+```text
+https://github.com/afan914/chatgpt-codex-bridge
+```
+
+点击 Code -> Download ZIP，解压后，在解压出的项目文件夹里打开终端。
 
 安装依赖：
 
