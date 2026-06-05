@@ -1,0 +1,14 @@
+{
+  "name": "extension",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "echo \"Extension build is implemented in Milestone 2\"",
+    "typecheck": "echo \"Extension typecheck is implemented in Milestone 2\"",
+    "lint": "echo \"Extension lint is implemented in Milestone 2\""
+  },
+  "dependencies": {
+    "@chatgpt-codex-bridge/shared": "workspace:*"
+  }
+}

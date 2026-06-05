@@ -1,0 +1,74 @@
+{
+  "conversation": {
+    "title": "Atlas plugin discussion",
+    "url": "https://chatgpt.com/c/abc123",
+    "exportedAt": "2026-06-05T08:30:00.000Z"
+  },
+  "messages": [
+    {
+      "index": 1,
+      "role": "user",
+      "content": "I want to build an Atlas browser extension that sends my ChatGPT conversation context to Codex.",
+      "links": [],
+      "codeBlocks": []
+    },
+    {
+      "index": 2,
+      "role": "assistant",
+      "content": "You should build a browser extension plus a local Bridge CLI. The extension reads the ChatGPT page and the Bridge writes files into the Codex project directory.",
+      "links": [
+        {
+          "text": "Chrome extension docs",
+          "url": "https://developer.chrome.com/docs/extensions/"
+        }
+      ],
+      "codeBlocks": [
+        {
+          "language": "ts",
+          "content": "server.listen({ host: '127.0.0.1', port: 17321 });"
+        },
+        {
+          "language": "json",
+          "content": "{ \"defaultProjectPath\": \"/Users/example/projects/demo\", \"port\": 17321 }"
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "role": "user",
+      "content": "I do not want to manually export, download, unzip, or import files. I want a one-click Send to Codex flow.",
+      "links": [],
+      "codeBlocks": []
+    },
+    {
+      "index": 4,
+      "role": "assistant",
+      "content": "The MVP should focus on the automatic local context transfer chain. Missing assets should be recorded in assets_manifest.json instead of being silently dropped.",
+      "links": [],
+      "codeBlocks": [
+        {
+          "language": "text",
+          "content": "ChatGPT page -> Extension -> Local Bridge -> Codex project .codex-context/"
+        }
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "id": "asset_001",
+      "type": "image",
+      "status": "unresolved",
+      "sourceUrl": "blob:https://chatgpt.com/example-image",
+      "sourceMessageIndex": 2,
+      "failureReason": "Blob URL cannot be fetched from the Bridge"
+    },
+    {
+      "id": "asset_002",
+      "type": "html",
+      "status": "unresolved",
+      "sourceUrl": "https://chatgpt.com/backend-api/artifact/example",
+      "sourceMessageIndex": 4,
+      "failureReason": "Artifact download is not implemented in MVP"
+    }
+  ]
+}

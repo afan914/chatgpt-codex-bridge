@@ -1,0 +1,22 @@
+{
+  "name": "chatgpt-codex-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local bridge that sends ChatGPT conversation context into a Codex project directory.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev:bridge": "pnpm --filter bridge dev",
+    "build:bridge": "pnpm --filter bridge build",
+    "build:extension": "pnpm --filter extension build",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3"
+  },
+  "packageManager": "pnpm@9.4.0"
+}
