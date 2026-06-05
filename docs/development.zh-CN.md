@@ -102,7 +102,37 @@ Milestone 2 发送的是 mock payload。真实 ChatGPT DOM 提取会在 Mileston
 apps/extension/dist/manifest.json
 apps/extension/dist/popup.html
 apps/extension/dist/serviceWorker.js
+apps/extension/dist/content.js
 ```
+
+## 验证 Content Script 构建
+
+运行：
+
+```bash
+pnpm build:extension
+```
+
+检查：
+
+```text
+apps/extension/dist/content.js
+apps/extension/dist/manifest.json
+```
+
+manifest 必须引用：
+
+```json
+"js": ["content.js"]
+```
+
+打开 ChatGPT 页面，打开 DevTools，确认出现日志：
+
+```text
+ChatGPT Context Bridge content script loaded
+```
+
+content script 通过 `vite.content.config.ts` 构建为 IIFE bundle，不依赖运行时 import 解析。
 
 ## Mock Payload 测试
 

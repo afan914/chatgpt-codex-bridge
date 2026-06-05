@@ -31,6 +31,23 @@ apps/extension/dist
 ```
 
 该目录必须包含 `manifest.json`、`popup.html` 和 `serviceWorker.js`。
+它还必须包含会注入 ChatGPT 页面的 `content.js`。
+
+## Content Script 构建
+
+content script 单独通过下面命令构建：
+
+```bash
+pnpm --filter extension build:content
+```
+
+普通构建命令会自动执行它：
+
+```bash
+pnpm --filter extension build
+```
+
+`content.js` 会输出为独立 IIFE bundle，这样 Chrome 可以把它作为 content script 执行，而不需要运行时 import。
 
 ## 权限
 
@@ -51,6 +68,8 @@ POST http://127.0.0.1:17321/import-chatgpt-context
 ```
 
 如果 Bridge 未连接，弹窗会显示翻译后的提示，并禁用 Send to Codex。
+
+popup 还会通过 `chrome.tabs.sendMessage` ping ChatGPT content script。如果 content script 不可用，popup 会显示翻译后的刷新页面提示，并禁用 Send to Codex。
 
 ## i18n
 

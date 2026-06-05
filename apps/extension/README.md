@@ -31,6 +31,23 @@ apps/extension/dist
 ```
 
 The folder must contain `manifest.json`, `popup.html`, and `serviceWorker.js`.
+It must also contain `content.js`, which is injected into ChatGPT pages.
+
+## Content Script Build
+
+The content script is built separately with:
+
+```bash
+pnpm --filter extension build:content
+```
+
+The normal build command runs this automatically:
+
+```bash
+pnpm --filter extension build
+```
+
+`content.js` is emitted as a standalone IIFE bundle so Chrome can execute it as a content script without runtime imports.
 
 ## Permissions
 
@@ -51,6 +68,8 @@ POST http://127.0.0.1:17321/import-chatgpt-context
 ```
 
 If Bridge is disconnected, the popup shows a translated hint and disables Send to Codex.
+
+The popup also pings the ChatGPT content script with `chrome.tabs.sendMessage`. If the content script is unavailable, the popup shows a translated refresh-page hint and disables Send to Codex.
 
 ## i18n
 

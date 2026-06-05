@@ -68,3 +68,13 @@ Bridge 可以把私有对话内容写入本地项目目录。绑定到 `127.0.0.
 ## 为什么不使用 `chrome.i18n`
 
 扩展使用自定义翻译表，而不是 `chrome.i18n`，因为项目需要在 popup 内手动运行时切换语言。`chrome.i18n` 跟随浏览器语言，不适合这个简单的手动切换需求。
+
+## Content Script 构建
+
+content script 会构建为独立的 IIFE bundle，以便作为 Chrome content script 稳定运行。最终扩展构建会输出：
+
+```text
+apps/extension/dist/content.js
+```
+
+popup 通过 `chrome.tabs.sendMessage` 与 content script 通信。popup 必须处理连接失败，因为扩展重新加载后，已经打开的 ChatGPT 页面可能还没有重新注入 content script，需要刷新页面。

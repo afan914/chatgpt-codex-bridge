@@ -7,6 +7,7 @@ import { LanguageToggle } from "./components/LanguageToggle";
 import { SendButton } from "./components/SendButton";
 import { StatusBadge } from "./components/StatusBadge";
 import { useBridgeStatus } from "./hooks/useBridgeStatus";
+import { useConversationExtraction } from "./hooks/useConversationExtraction";
 import { useCurrentTab } from "./hooks/useCurrentTab";
 import { useLocale } from "./hooks/useLocale";
 import { buildMockPayload } from "./mockPayload";
@@ -22,6 +23,11 @@ export function Popup(): JSX.Element {
   const currentTabTitle = currentTab.status === "ready" ? currentTab.title : undefined;
   const currentTabUrl = currentTab.status === "ready" ? currentTab.url : undefined;
   const isCurrentTabChatGPT = currentTab.status === "ready" && currentTab.isChatGPTPage;
+  const currentTabId = currentTab.status === "ready" ? currentTab.tabId : undefined;
+  const { extractionStatus, retry: retryExtraction } = useConversationExtraction({
+    tabId: currentTabId,
+    isChatGPTPage: isCurrentTabChatGPT
+  });
 
   const mockPayloadPreview = useMemo(
     () => buildMockPayload({ title: currentTabTitle, url: currentTabUrl }),
@@ -39,6 +45,7 @@ export function Popup(): JSX.Element {
     bridgeStatus: bridgeStatus.status,
     currentTabStatus: currentTab.status,
     isCurrentTabChatGPT,
+    extractionStatus: extractionStatus.status,
     isSending
   });
   const isSendDisabled = disabledReason !== undefined;
@@ -54,6 +61,11 @@ export function Popup(): JSX.Element {
 
     if (bridgeStatus.status !== "connected") {
       setErrorMessage(t(locale, "bridgeDisconnectedHint"));
+      return;
+    }
+
+    if (extractionStatus.status !== "ready") {
+      setErrorMessage(`${t(locale, "contentScriptUnavailable")} ${t(locale, "refreshChatGPTPageHint")}`);
       return;
     }
 
@@ -143,6 +155,30 @@ export function Popup(): JSX.Element {
         </dl>
       </section>
 
+      <section className="panel">
+        <div className="section-heading">
+          <h2>{t(locale, "extractionStatus")}</h2>
+          {isCurrentTabChatGPT && (
+            <button className="text-button" type="button" onClick={() => void retryExtraction()}>
+              {t(locale, "retryExtraction")}
+            </button>
+          )}
+        </div>
+        {!isCurrentTabChatGPT && <StatusBadge status="neutral">{t(locale, "currentPageNotChatGPT")}</StatusBadge>}
+        {isCurrentTabChatGPT && extractionStatus.status === "checking" && (
+          <StatusBadge status="neutral">{t(locale, "checkingExtraction")}</StatusBadge>
+        )}
+        {isCurrentTabChatGPT && extractionStatus.status === "ready" && (
+          <StatusBadge status="success">{t(locale, "contentScriptReady")}</StatusBadge>
+        )}
+        {isCurrentTabChatGPT && extractionStatus.status === "failed" && (
+          <div className="stack">
+            <StatusBadge status="error">{t(locale, extractionStatus.messageKey)}</StatusBadge>
+            {extractionStatus.hintKey && <span className="meta">{t(locale, extractionStatus.hintKey)}</span>}
+          </div>
+        )}
+      </section>
+
       {disabledReason && <div className="message message--hint">{t(locale, disabledReason)}</div>}
       <ErrorMessage message={errorMessage} />
 
@@ -170,6 +206,7 @@ type DisabledReasonInput = {
   bridgeStatus: "checking" | "connected" | "disconnected";
   currentTabStatus: "loading" | "ready" | "error";
   isCurrentTabChatGPT: boolean;
+  extractionStatus: "idle" | "checking" | "ready" | "failed";
   isSending: boolean;
 };
 
@@ -177,6 +214,7 @@ type DisabledReason =
   | "buttonDisabledBridgeDisconnected"
   | "buttonDisabledChecking"
   | "buttonDisabledNotChatGPT"
+  | "buttonDisabledContentScriptUnavailable"
   | "sending";
 
 function getDisabledReason(input: DisabledReasonInput): DisabledReason | undefined {
@@ -194,6 +232,14 @@ function getDisabledReason(input: DisabledReasonInput): DisabledReason | undefin
 
   if (!input.isCurrentTabChatGPT) {
     return "buttonDisabledNotChatGPT";
+  }
+
+  if (input.extractionStatus === "checking" || input.extractionStatus === "idle") {
+    return "buttonDisabledChecking";
+  }
+
+  if (input.extractionStatus === "failed") {
+    return "buttonDisabledContentScriptUnavailable";
   }
 
   return undefined;

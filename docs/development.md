@@ -106,7 +106,37 @@ After `pnpm build:extension`, confirm these files exist:
 apps/extension/dist/manifest.json
 apps/extension/dist/popup.html
 apps/extension/dist/serviceWorker.js
+apps/extension/dist/content.js
 ```
+
+## Verify Content Script Build
+
+After running:
+
+```bash
+pnpm build:extension
+```
+
+Check:
+
+```text
+apps/extension/dist/content.js
+apps/extension/dist/manifest.json
+```
+
+The manifest must reference:
+
+```json
+"js": ["content.js"]
+```
+
+Open a ChatGPT page, open DevTools, and confirm this log appears:
+
+```text
+ChatGPT Context Bridge content script loaded
+```
+
+The content script is built with `vite.content.config.ts` as an IIFE bundle so it does not rely on runtime import resolution.
 
 ## Mock Payload Test
 

@@ -5,6 +5,7 @@ export type CurrentTabState =
   | { status: "loading" }
   | {
       status: "ready";
+      tabId?: number;
       url?: string;
       title?: string;
       isChatGPTPage: boolean;
@@ -38,6 +39,7 @@ export function useCurrentTab(): CurrentTabState {
 
       setState({
         status: "ready",
+        tabId: tab.id,
         url: tab.url,
         title: tab.title,
         isChatGPTPage: isChatGPTPage(tab.url)

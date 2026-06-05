@@ -118,3 +118,22 @@ apps/extension/dist/manifest.json
 ```
 
 如果缺失，请检查 `apps/extension/vite.config.ts` 中的 Vite manifest copy plugin。
+
+## Content Script 不可用
+
+如果 popup 提示无法访问 ChatGPT 页面，可能是 content script 没有注入。
+
+常见原因：
+
+1. 你在 ChatGPT 页面已经打开后，才加载或重新加载扩展。
+2. ChatGPT 页面尚未加载完成。
+3. 浏览器没有注入 content script。
+4. content script 构建失败，或缺少 `content.js`。
+
+修复方式：
+
+1. 刷新 ChatGPT 页面。
+2. 重新打开扩展 popup。
+3. 如果仍然失败，进入 `chrome://extensions` 重新加载扩展，然后再次刷新 ChatGPT。
+4. 确认 `apps/extension/dist/content.js` 存在。
+5. 确认 `apps/extension/dist/manifest.json` 引用了 `content.js`。

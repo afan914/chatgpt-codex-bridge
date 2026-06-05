@@ -118,3 +118,22 @@ apps/extension/dist/manifest.json
 ```
 
 If it is missing, inspect the Vite manifest copy plugin in `apps/extension/vite.config.ts`.
+
+## Content Script Unavailable
+
+If the popup says it cannot access the ChatGPT page, the content script may not have been injected.
+
+Common causes:
+
+1. You loaded or reloaded the extension after the ChatGPT page was already open.
+2. The ChatGPT page has not finished loading.
+3. The browser did not inject the content script.
+4. The content script build failed or `content.js` is missing.
+
+Fix:
+
+1. Refresh the ChatGPT page.
+2. Reopen the extension popup.
+3. If it still fails, go to `chrome://extensions`, reload the extension, then refresh ChatGPT again.
+4. Make sure `apps/extension/dist/content.js` exists.
+5. Make sure `apps/extension/dist/manifest.json` references `content.js`.

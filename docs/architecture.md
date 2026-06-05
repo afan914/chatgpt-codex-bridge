@@ -68,3 +68,13 @@ The Bridge can write private conversation content into local project folders. Bi
 ## Why Not `chrome.i18n`
 
 The extension uses a custom translation map instead of `chrome.i18n` because this project requires manual runtime language switching inside the popup. `chrome.i18n` follows browser locale and is not designed for this simple runtime toggle behavior.
+
+## Content Script Build
+
+The content script is built as a standalone IIFE-style bundle so it can run reliably as a Chrome content script. The final extension build emits:
+
+```text
+apps/extension/dist/content.js
+```
+
+The popup communicates with the content script using `chrome.tabs.sendMessage`. The popup must handle connection failures because the content script may not be available until the ChatGPT page is refreshed after extension reload.
