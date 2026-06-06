@@ -18,7 +18,7 @@ pnpm typecheck
 pnpm lint
 ```
 
-Milestone 3 中 extension 的 build、lint、popup 和真实提取流程已经是真实实现。
+Extension 的 build、popup、真实提取、资源提取、项目选择和上下文包导出已经可用于本地完整流程。
 
 ## 以开发模式运行 Bridge
 
@@ -86,7 +86,7 @@ pnpm dev:bridge
 <project-root>/.codex-context/chatgpt/
 ```
 
-Milestone 3 默认发送真实提取的 ChatGPT 对话。
+默认发送当前页面读取到的真实 ChatGPT 对话。旧 payload 不带 `destination` 时仍会导入默认 Codex 项目。
 
 ## 测试 i18n
 

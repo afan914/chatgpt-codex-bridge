@@ -1,4 +1,11 @@
 export interface BridgeConfig {
-  defaultProjectPath?: string;
+  defaultProjectId?: string;
   port: number;
+  projects: BridgeProject[];
+}
+
+export interface BridgeProject {
+  id: string;
+  name: string;
+  path: string;
 }

@@ -1,7 +1,8 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { BridgeConfig, ImportSuccessResponse } from "@chatgpt-codex-bridge/shared";
 import { validateImportPayload } from "@chatgpt-codex-bridge/shared";
-import { writeContextExport } from "../../writer/contextWriter.js";
+import { getProjectById, loadBridgeConfig } from "../../config/configStore.js";
+import { exportAsPackage, importToCodexProject } from "../../writer/contextWriter.js";
 import { errorToApiError, sendApiError, sendJson } from "../middleware/errorHandler.js";
 
 export async function handleImportChatGPTContext(
@@ -22,11 +23,21 @@ export async function handleImportChatGPTContext(
   }
 
   try {
-    const result = await writeContextExport(config.defaultProjectPath, validation.value);
+    const currentConfig = await loadBridgeConfig().catch(() => config);
+    const destination = validation.value.destination ?? { type: "codex_project" as const };
+    const result =
+      destination.type === "package"
+        ? await exportAsPackage({ ...validation.value, destination })
+        : await importToCodexProject(resolveProjectPath(currentConfig, destination.projectId), {
+            ...validation.value,
+            destination
+          });
     const body: ImportSuccessResponse = {
       ok: true,
+      mode: result.mode,
       conversationSlug: result.conversationSlug,
       outputDir: result.outputDir,
+      packagePath: result.packagePath,
       filesWritten: result.filesWritten
     };
     sendJson(response, 200, body);
@@ -34,6 +45,18 @@ export async function handleImportChatGPTContext(
     const apiError = errorToApiError(error);
     sendApiError(response, apiError.statusCode, apiError.code, apiError.message);
   }
+}
+
+function resolveProjectPath(config: BridgeConfig, projectId: string | undefined): string {
+  const project = getProjectById(config, projectId);
+  if (!project) {
+    if (config.projects.length === 0) {
+      throw new Error("NO_PROJECT_CONFIGURED");
+    }
+    throw new Error("PROJECT_NOT_FOUND");
+  }
+
+  return project.path;
 }
 
 async function readJsonRequestBody(request: IncomingMessage): Promise<

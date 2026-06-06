@@ -3,6 +3,7 @@ import type {
   ExtractedCodeBlock,
   ExtractedLink,
   ImportChatGPTContextPayload,
+  ImportDestination,
   MessageRole
 } from "../types/payload.js";
 import type { AssetReference, AssetStatus, AssetType } from "../types/asset.js";
@@ -19,7 +20,7 @@ export type ValidationResult<T> =
   | { ok: false; error: ValidationError };
 
 const messageRoles: MessageRole[] = ["user", "assistant", "unknown"];
-const assetTypes: AssetType[] = ["image", "html", "markdown", "file", "link", "unknown"];
+const assetTypes: AssetType[] = ["image", "html", "markdown", "file", "link", "code", "unknown"];
 const assetStatuses: AssetStatus[] = ["saved", "unresolved", "failed"];
 
 export function validateImportPayload(input: unknown): ValidationResult<ImportChatGPTContextPayload> {
@@ -42,12 +43,18 @@ export function validateImportPayload(input: unknown): ValidationResult<ImportCh
     return assetsResult;
   }
 
+  const destinationResult = validateDestination(input.destination);
+  if (!destinationResult.ok) {
+    return destinationResult;
+  }
+
   return {
     ok: true,
     value: {
       conversation: conversationResult.value,
       messages: messagesResult.value,
-      assets: assetsResult.value
+      assets: assetsResult.value,
+      destination: destinationResult.value
     }
   };
 }
@@ -202,13 +209,43 @@ function validateAssets(input: unknown): ValidationResult<AssetReference[]> {
       type: item.type as AssetType,
       status: item.status as AssetStatus,
       sourceUrl: typeof item.sourceUrl === "string" ? item.sourceUrl : undefined,
+      sourceLabel: typeof item.sourceLabel === "string" ? item.sourceLabel : undefined,
       sourceMessageIndex: typeof item.sourceMessageIndex === "number" ? item.sourceMessageIndex : undefined,
       filename: typeof item.filename === "string" || item.filename === null ? item.filename : undefined,
-      failureReason: typeof item.failureReason === "string" ? item.failureReason : undefined
+      failureReason: typeof item.failureReason === "string" ? item.failureReason : undefined,
+      mimeType: typeof item.mimeType === "string" ? item.mimeType : undefined,
+      sizeBytes: typeof item.sizeBytes === "number" ? item.sizeBytes : undefined,
+      content: typeof item.content === "string" ? item.content : undefined
     });
   }
 
   return { ok: true, value: assets };
+}
+
+function validateDestination(input: unknown): ValidationResult<ImportDestination | undefined> {
+  if (input === undefined) {
+    return { ok: true, value: undefined };
+  }
+
+  if (!isRecord(input) || typeof input.type !== "string") {
+    return invalid("INVALID_PAYLOAD", "destination must include a type when present");
+  }
+
+  if (input.type === "package") {
+    return { ok: true, value: { type: "package" } };
+  }
+
+  if (input.type === "codex_project") {
+    return {
+      ok: true,
+      value: {
+        type: "codex_project",
+        projectId: typeof input.projectId === "string" && input.projectId.trim().length > 0 ? input.projectId : undefined
+      }
+    };
+  }
+
+  return invalid("INVALID_PAYLOAD", "destination.type must be codex_project or package");
 }
 
 function isRecord(input: unknown): input is Record<string, unknown> {

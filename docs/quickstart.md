@@ -1,55 +1,6 @@
 # Quickstart for Non-technical Users
 
-## What you will set up
-
-You will set up two local pieces:
-
-- The browser extension popup checks ChatGPT pages and sends the real current conversation.
-- The local Bridge runs on your computer.
-- The Bridge writes the conversation context into your Codex project folder.
-- Nothing is uploaded to a remote server by this tool.
-
-Milestone 3 includes the local Bridge, browser extension popup, and real ChatGPT conversation extraction.
-
-## Step 1: Install Node.js
-
-Go to https://nodejs.org and install the LTS version.
-
-After installation, open Terminal and run:
-
-```bash
-node --version
-npm --version
-```
-
-Expected output:
-
-```text
-v20.x.x
-10.x.x
-```
-
-The exact numbers may be different. If Terminal says `command not found`, close Terminal, open it again, and retry.
-
-## Step 2: Install pnpm
-
-Run:
-
-```bash
-npm install -g pnpm
-```
-
-Then verify:
-
-```bash
-pnpm --version
-```
-
-If this fails, Node.js or npm may not be installed correctly.
-
-## Step 3: Download this project
-
-### Option A: Download ZIP from GitHub
+## Step 1: Download This Project
 
 Open:
 
@@ -57,134 +8,114 @@ Open:
 https://github.com/afan914/chatgpt-codex-bridge
 ```
 
-Click the green "Code" button, choose "Download ZIP", then unzip it. Open Terminal and move into the unzipped folder.
+Click `Code`, choose `Download ZIP`, unzip it, then open Terminal in the unzipped `chatgpt-codex-bridge` folder.
 
-### Option B: Use git clone
-
-For users who already have Git:
+If you already use Git:
 
 ```bash
 git clone https://github.com/afan914/chatgpt-codex-bridge.git
 cd chatgpt-codex-bridge
 ```
 
-## Step 4: Install project dependencies
-
-Run:
+## Step 2: Install Dependencies
 
 ```bash
-cd chatgpt-codex-bridge
 pnpm install
 ```
 
-This downloads the libraries the project needs. It may take a few minutes.
-
-## Step 5: Configure your Codex project folder
-
-Run:
-
-```bash
-pnpm dev:bridge -- init
-pnpm dev:bridge -- config set-project /path/to/your/codex/project
-```
-
-Replace `/path/to/your/codex/project` with the folder where your Codex project lives.
-
-On Mac, you can drag a folder into Terminal to paste its full path.
-
-Expected output should say that the default project path was set.
-
-## Step 6: Start the Bridge
-
-Run:
+## Step 3: Start Bridge
 
 ```bash
 pnpm dev:bridge
 ```
 
-Expected output:
+Keep this Terminal window open.
 
-```text
-ChatGPT Codex Bridge running at http://127.0.0.1:17321
+## Step 4: Add a Codex Project
+
+If you want automatic Codex import, add your project folder:
+
+```bash
+chatgpt-codex-bridge project add my-project /path/to/your/project
 ```
 
-Keep this Terminal window open while using the extension.
+On Mac, you can drag a folder into Terminal to paste its full path.
 
-## Step 7: Build the extension
+## Step 5: Build Extension
 
-Open a new Terminal window and run:
+Open a new Terminal window in the project folder:
 
 ```bash
 pnpm build:extension
 ```
 
-This creates the browser extension files under:
+## Step 6: Load Extension
+
+1. Open `chrome://extensions`.
+2. Enable Developer mode.
+3. Click Load unpacked.
+4. Select `apps/extension/dist`.
+
+## Step 7: Open ChatGPT Conversation
+
+Open the conversation you want to send to Codex or export.
+
+The extension reads the ChatGPT conversation currently open in your browser tab.
+
+## Step 8: Open Extension Popup
+
+Expected:
 
 ```text
-apps/extension/dist
+Local service connected
+ChatGPT conversation detected
+Conversation ready
+Summary shown
 ```
 
-## Step 8: Load the extension in Atlas / Chrome / Arc
+## Step 9A: Import to Codex Project
 
-1. Open your browser.
-2. Go to:
+1. Choose Import to Codex project.
+2. Select project.
+3. Click Import to Codex.
+
+Expected:
 
 ```text
-chrome://extensions
+Success
+Output directory: <project-root>/.codex-context/chatgpt/<conversation-slug>/
 ```
 
-3. Turn on "Developer mode".
-4. Click "Load unpacked".
-5. Select:
+## Step 9B: Export as Package
+
+1. Choose Export as package.
+2. Click Export Package.
+
+Expected:
 
 ```text
-chatgpt-codex-bridge/apps/extension/dist
+Success
+Package path: ~/.chatgpt-codex-bridge/exports/chatgpt-context-package-<conversation-slug>.zip
 ```
 
-## Step 9: Test the full flow
+## Step 10: Use in Codex App
 
-1. Open a real ChatGPT conversation.
-2. Click the extension icon.
-3. Confirm:
-
-   * Bridge connected
-   * ChatGPT page detected
-   * Conversation extracted
-4. Switch language if needed.
-5. Click "Send to Codex".
-6. Open your configured Codex project folder.
-7. Check that this folder exists:
+Ask Codex:
 
 ```text
-.codex-context/chatgpt/
+Please read .codex-context/chatgpt/<conversation-slug>/CODEX_TASK.md first, then review assets_manifest.json and continue implementation based on that context.
 ```
 
-This version extracts the real conversation text, code blocks, and links. It may not yet save generated images, downloadable files, or ChatGPT artifacts. Those will be improved in a later milestone.
+## Step 11: Use Package in Other Tools
 
-You can also test the Bridge directly with:
+Unzip the package and give the folder to any development tool that can read local Markdown and files.
 
-```bash
-curl -X POST http://127.0.0.1:17321/import-chatgpt-context \
-  -H "Content-Type: application/json" \
-  -d @examples/mock-payload.json
-```
-
-## Step 10: Use it in Codex App
-
-In Codex App, ask Codex to read:
+Ask the tool:
 
 ```text
-.codex-context/chatgpt/<conversation-slug>/CODEX_TASK.md
+Please read CODEX_TASK.md first, then review full_conversation.md and assets_manifest.json.
 ```
 
-Then continue the implementation based on that context.
+## Asset Note
 
-If the popup says it cannot access the ChatGPT page, refresh the ChatGPT page and reopen the popup. This can happen after reloading the extension because the content script needs to be injected into the page again.
-
-## Troubleshooting
-
-See:
-
-```text
-docs/troubleshooting.md
-```
+Some files may not be saved automatically. If that happens, they will be listed in `assets_manifest.json` as unresolved or failed. This is expected for some ChatGPT images, blob links, or protected files.

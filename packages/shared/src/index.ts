@@ -4,6 +4,7 @@ export type {
   ConversationMetadata,
   ExtractedCodeBlock,
   ExtractedLink,
+  ImportDestination,
   ImportChatGPTContextPayload,
   MessageRole
 } from "./types/payload.js";
@@ -12,10 +13,13 @@ export type {
   ErrorResponse,
   HealthResponse,
   ImportChatGPTContextResponse,
-  ImportSuccessResponse
+  ImportSuccessResponse,
+  ProjectListItem,
+  ProjectsResponse
 } from "./types/response.js";
-export type { BridgeConfig } from "./types/config.js";
+export type { BridgeConfig, BridgeProject } from "./types/config.js";
 export type { Locale, TranslationKey } from "./i18n/types.js";
+export { ASSET_FAILURE_REASONS } from "./constants/assetFailureReasons.js";
 export { translations } from "./i18n/translations.js";
 export { t } from "./i18n/t.js";
 export { validateImportPayload, type ValidationResult, type ValidationError } from "./validation/validatePayload.js";

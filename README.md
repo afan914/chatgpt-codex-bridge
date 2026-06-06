@@ -2,30 +2,31 @@
 
 [English](README.md) | [中文](README.zh-CN.md)
 
-ChatGPT Context Bridge for Codex is a local-first project for moving the context of a ChatGPT conversation into a Codex project directory.
+ChatGPT Context Bridge for Codex moves the context of the ChatGPT conversation currently open in your browser into a local Codex project or a portable zip package.
 
-It exists because a user may plan, discuss, and refine implementation details in ChatGPT, then use Codex App to build the actual project. The MVP closes that context gap without manual copying, exporting, downloading, or cloud sync.
-
-The project now includes a local Bridge CLI, a Manifest V3 browser extension popup, a mock Send to Codex flow, runtime English / Chinese switching, and a local-only architecture.
+It is local-first: the browser extension reads the active ChatGPT tab, the Bridge runs on `127.0.0.1`, and generated files are written on your computer. The tool does not call private ChatGPT APIs and does not upload conversation content.
 
 ## Current Status
 
 Milestone 1: Bridge core is implemented.
 Milestone 2: Extension popup with mock payload and i18n is implemented.
 Milestone 3: Real ChatGPT conversation extraction is implemented.
-Milestone 4: Full asset downloading is not implemented yet.
+Milestone 4: Asset extraction, Codex project selection, package export, and full local usable flow are implemented.
 
-## Architecture
+## What Works Now
 
-The project is split into three responsibilities:
+1. Bridge runs locally on `127.0.0.1:17321`.
+2. Bridge manages multiple Codex project paths.
+3. Extension popup connects to the local Bridge.
+4. Extension supports English / Chinese switching.
+5. Extension reads the currently opened ChatGPT conversation.
+6. Extension extracts messages, code blocks, links, and asset references.
+7. Extension / Bridge saves supported assets, including snippets, HTML / Markdown artifacts, and supported data URL images.
+8. Unresolved or failed assets are recorded in `assets_manifest.json`.
+9. You can import directly into a selected Codex project.
+10. You can export a zip package for other tools or manual use.
 
-- Browser extension: shows a popup, checks Bridge health, detects ChatGPT pages by URL, switches EN / 中文 at runtime, extracts the current ChatGPT conversation, and sends it to the local Bridge.
-- Local Bridge CLI: runs on `127.0.0.1:17321`, validates payloads, and writes context files into a configured Codex project directory.
-- Shared package: owns shared TypeScript types, validation, slug helpers, filename helpers, URL helpers, and popup i18n helpers.
-
-The Bridge never extracts browser DOM directly, never calls private ChatGPT APIs, and never uploads conversation content to a remote service.
-
-## Quick Start
+## Full Local Flow
 
 Clone this repository:
 
@@ -34,36 +35,22 @@ git clone https://github.com/afan914/chatgpt-codex-bridge.git
 cd chatgpt-codex-bridge
 ```
 
-Or download it from GitHub:
-
-```text
-https://github.com/afan914/chatgpt-codex-bridge
-```
-
-Click Code -> Download ZIP, unzip it, then open Terminal in the unzipped project folder.
-
 Install dependencies:
 
 ```bash
 pnpm install
 ```
 
-Create the Bridge config:
-
-```bash
-pnpm dev:bridge -- init
-```
-
-Configure your Codex project directory:
-
-```bash
-pnpm dev:bridge -- config set-project /path/to/your/codex/project
-```
-
-Start the Bridge:
+Start the local Bridge:
 
 ```bash
 pnpm dev:bridge
+```
+
+In another Terminal, add a Codex project:
+
+```bash
+chatgpt-codex-bridge project add <id> <path>
 ```
 
 Build the extension:
@@ -72,50 +59,40 @@ Build the extension:
 pnpm build:extension
 ```
 
-Test health:
+Load `apps/extension/dist` as an unpacked extension in `chrome://extensions`.
 
-```bash
-curl http://127.0.0.1:17321/health
-```
+Then:
 
-Test import with the mock payload:
-
-```bash
-curl -X POST http://127.0.0.1:17321/import-chatgpt-context \
-  -H "Content-Type: application/json" \
-  -d @examples/mock-payload.json
-```
-
-Generated files should appear under:
-
-```text
-<project-root>/.codex-context/chatgpt/atlas-plugin-discussion-abc123/
-```
-
-If you are not familiar with Terminal, Node.js, or browser extensions, start with the non-technical quickstart:
-[Quickstart for Non-technical Users](docs/quickstart.md)
+1. Open the ChatGPT conversation you want to export.
+2. Click the extension.
+3. Confirm the local service is connected.
+4. Confirm the ChatGPT conversation is detected.
+5. Confirm conversation and asset summary are shown.
+6. Choose `Import to Codex project` or `Export as package`.
+7. Click the main action.
+8. Open the generated `.codex-context/chatgpt/` folder or exported package.
 
 ## Running the Bridge
 
-The Bridge CLI command is:
-
-```bash
-chatgpt-codex-bridge
-```
-
-During local development, use:
+During local development:
 
 ```bash
 pnpm dev:bridge
 ```
 
-Supported commands:
+Project registry commands:
 
 ```bash
-pnpm dev:bridge -- init
-pnpm dev:bridge -- start
-pnpm dev:bridge -- status
-pnpm dev:bridge -- config set-project /path/to/project
+chatgpt-codex-bridge project list
+chatgpt-codex-bridge project add <id> <path>
+chatgpt-codex-bridge project remove <id>
+chatgpt-codex-bridge project set-default <id>
+```
+
+The older shortcut still works:
+
+```bash
+chatgpt-codex-bridge config set-project /path/to/project
 ```
 
 ## Loading the Extension
@@ -131,37 +108,16 @@ Then:
 3. Click Load unpacked.
 4. Select `apps/extension/dist`.
 
-## Using the Popup
-
-1. Start the Bridge with `pnpm dev:bridge`.
-2. Open a real ChatGPT conversation in Atlas / Chromium.
-3. Open the extension popup.
-4. Confirm Bridge connected.
-5. Confirm ChatGPT page detected.
-6. Confirm conversation extracted.
-7. Switch EN / 中文 if needed.
-8. Click Send to Codex.
-9. Check `<project-root>/.codex-context/chatgpt/`.
-
-## What Works Now
-
-- The Bridge runs locally on `127.0.0.1`.
-- The extension popup connects to Bridge.
-- The popup supports English / Chinese switching.
-- The extension reads the current ChatGPT page DOM.
-- The extension extracts conversation messages, roles, code blocks, and links.
-- Clicking Send to Codex writes the real conversation context to `.codex-context/chatgpt/`.
-
 ## Current Limitations
 
-- Milestone 3 extracts real conversation text, code blocks, and links from the current ChatGPT page.
-- It does not yet fully download generated images, files, HTML artifacts, or Markdown artifacts. Those are planned for Milestone 4.
-- Duplicate imports overwrite the deterministic conversation folder.
+Some ChatGPT assets may remain unresolved, especially blob URLs, protected URLs, or artifacts that require private ChatGPT backend access. The tool records these in `assets_manifest.json` instead of silently dropping them.
+
+Duplicate imports overwrite the deterministic conversation folder for that project.
 
 ## Security Notes
 
 - The Bridge binds only to `127.0.0.1`.
-- The Bridge writes only inside the configured project directory.
+- The Bridge writes only inside explicitly configured project directories or the local export directory.
 - Path traversal is rejected.
 - No conversation content is uploaded by this tool.
 - Private ChatGPT APIs are intentionally not used.

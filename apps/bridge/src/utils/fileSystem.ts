@@ -33,6 +33,11 @@ export async function writeTextFile(filePath: string, value: string): Promise<vo
   await writeFile(filePath, value, "utf8");
 }
 
+export async function writeBinaryFile(filePath: string, value: Buffer): Promise<void> {
+  await ensureDirectory(path.dirname(filePath));
+  await writeFile(filePath, value);
+}
+
 export async function recreateDirectory(directoryPath: string): Promise<void> {
   await rm(directoryPath, { recursive: true, force: true });
   await mkdir(directoryPath, { recursive: true });

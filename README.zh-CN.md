@@ -2,45 +2,40 @@
 
 [English](README.md) | [中文](README.zh-CN.md)
 
-ChatGPT Context Bridge for Codex 是一个本地优先的工具，用来把 ChatGPT 对话上下文写入 Codex 项目目录。
+ChatGPT Context Bridge for Codex 是一个本地优先工具，用来把浏览器当前打开的 ChatGPT 对话上下文导入 Codex 项目，或导出为可携带的 zip 上下文包。
 
-它解决的问题很直接：你可能在 ChatGPT 里讨论产品想法、需求、技术方案和实现细节，然后切换到 Codex App 开始开发。但 Codex App 默认不知道前面 ChatGPT 对话里发生了什么。这个项目的 MVP 目标，就是用一个浏览器扩展和一个本地 Bridge CLI，把这段上下文自动交给 Codex。
+它解决的问题很直接：你在 ChatGPT 里讨论需求、方案和实现细节，然后切到 Codex App 开发时，Codex 默认不知道前面的讨论。这个工具把当前对话整理成本地文件，让 Codex 能接着读。
 
-当前项目包含本地 Bridge CLI、Manifest V3 浏览器扩展弹窗、mock Send to Codex 流程、英文 / 中文运行时切换，以及本地优先架构。
+本工具只在本机工作：扩展读取当前 ChatGPT 标签页，本地 Bridge 运行在 `127.0.0.1`，文件写入你的电脑。不会调用 ChatGPT 私有 API，也不会上传对话内容。
 
 ## 当前状态
 
 Milestone 1：Bridge core 已实现。
 Milestone 2：带 mock payload 和 i18n 的扩展弹窗已实现。
 Milestone 3：真实 ChatGPT 对话提取已实现。
-Milestone 4：完整资源下载尚未实现。
+Milestone 4：资源提取、Codex 项目选择、上下文包导出和完整本地可用流程已实现。
 
-## 架构概览
+## 当前可用能力
 
-项目分为三层职责：
-
-- 浏览器扩展：展示 popup，检查 Bridge 健康状态，通过 URL 检测 ChatGPT 页面，支持 EN / 中文切换，提取当前 ChatGPT 对话，并发送给本地 Bridge。
-- 本地 Bridge CLI：运行在 `127.0.0.1:17321`，校验 payload，并把上下文文件写入配置好的 Codex 项目目录。
-- Shared package：维护共享 TypeScript 类型、payload 校验、slug 生成、文件名清洗、URL 工具和弹窗 i18n 工具。
-
-Bridge 不直接解析浏览器 DOM，不调用 ChatGPT 私有 API，也不会把对话内容上传到远程服务。
+1. Bridge 在本地 `127.0.0.1:17321` 运行。
+2. Bridge 可以管理多个 Codex 项目路径。
+3. 扩展 popup 可以连接本地 Bridge。
+4. popup 支持英文 / 中文切换。
+5. 扩展读取当前打开的 ChatGPT 对话。
+6. 扩展提取消息、代码块、链接和资源引用。
+7. 扩展 / Bridge 会保存支持的资源，包括 snippets、HTML / Markdown 产物和支持的 data URL 图片。
+8. 未解析或保存失败的资源会记录在 `assets_manifest.json`。
+9. 你可以直接导入到选中的 Codex 项目。
+10. 你也可以导出 zip 上下文包，给其他工具或手动使用。
 
 ## 快速开始
 
-克隆这个仓库：
+克隆仓库：
 
 ```bash
 git clone https://github.com/afan914/chatgpt-codex-bridge.git
 cd chatgpt-codex-bridge
 ```
-
-或者从 GitHub 下载：
-
-```text
-https://github.com/afan914/chatgpt-codex-bridge
-```
-
-点击 Code -> Download ZIP，解压后，在解压出的项目文件夹里打开终端。
 
 安装依赖：
 
@@ -48,22 +43,16 @@ https://github.com/afan914/chatgpt-codex-bridge
 pnpm install
 ```
 
-初始化 Bridge 配置：
-
-```bash
-pnpm dev:bridge -- init
-```
-
-配置你的 Codex 项目目录：
-
-```bash
-pnpm dev:bridge -- config set-project /path/to/your/codex/project
-```
-
-启动 Bridge：
+启动本地 Bridge：
 
 ```bash
 pnpm dev:bridge
+```
+
+另开一个终端，添加 Codex 项目：
+
+```bash
+chatgpt-codex-bridge project add <id> <path>
 ```
 
 构建扩展：
@@ -72,98 +61,44 @@ pnpm dev:bridge
 pnpm build:extension
 ```
 
-测试健康检查：
-
-```bash
-curl http://127.0.0.1:17321/health
-```
-
-使用 mock payload 测试导入：
-
-```bash
-curl -X POST http://127.0.0.1:17321/import-chatgpt-context \
-  -H "Content-Type: application/json" \
-  -d @examples/mock-payload.json
-```
-
-生成的文件会出现在：
-
-```text
-<project-root>/.codex-context/chatgpt/atlas-plugin-discussion-abc123/
-```
-
-如果你不熟悉终端、Node.js 或浏览器扩展，请先阅读非技术用户快速开始：
-[非技术用户快速开始](docs/quickstart.zh-CN.md)
-
-## 运行 Bridge
-
-Bridge CLI 命令名是：
-
-```bash
-chatgpt-codex-bridge
-```
-
-本地开发时使用：
-
-```bash
-pnpm dev:bridge
-```
-
-支持的命令：
-
-```bash
-pnpm dev:bridge -- init
-pnpm dev:bridge -- start
-pnpm dev:bridge -- status
-pnpm dev:bridge -- config set-project /path/to/project
-```
-
-## 加载浏览器扩展
-
-```bash
-pnpm build:extension
-```
+在 `chrome://extensions` 里加载 `apps/extension/dist`。
 
 然后：
 
-1. 打开 `chrome://extensions`。
-2. 启用 Developer mode。
-3. 点击 Load unpacked。
-4. 选择 `apps/extension/dist`。
+1. 打开你想导出的 ChatGPT 对话。
+2. 点击扩展图标。
+3. 确认本地服务已连接。
+4. 确认已检测到 ChatGPT 对话。
+5. 确认对话和资源摘要已显示。
+6. 选择“导入到 Codex 项目”或“导出为上下文包”。
+7. 点击主按钮。
+8. 打开生成的 `.codex-context/chatgpt/` 目录或 zip 包。
 
-## 使用弹窗
+## Bridge 命令
 
-1. 用 `pnpm dev:bridge` 启动 Bridge。
-2. 在 Atlas / Chromium 中打开一个真实 ChatGPT 对话。
-3. 打开扩展弹窗。
-4. 确认 Bridge 已连接。
-5. 确认已检测到 ChatGPT 页面。
-6. 确认对话已读取。
-7. 如有需要，切换 EN / 中文。
-8. 点击 Send to Codex。
-9. 检查 `<project-root>/.codex-context/chatgpt/`。
+```bash
+chatgpt-codex-bridge project list
+chatgpt-codex-bridge project add <id> <path>
+chatgpt-codex-bridge project remove <id>
+chatgpt-codex-bridge project set-default <id>
+```
 
-## 当前可用能力
+旧快捷命令仍然可用：
 
-- Bridge 在本地 `127.0.0.1` 运行。
-- 扩展 popup 可以连接 Bridge。
-- popup 支持英文 / 中文切换。
-- 扩展会读取当前 ChatGPT 页面 DOM。
-- 扩展会提取对话消息、角色、代码块和链接。
-- 点击 Send to Codex 会把真实对话上下文写入 `.codex-context/chatgpt/`。
+```bash
+chatgpt-codex-bridge config set-project /path/to/project
+```
 
 ## 当前限制
 
-- Milestone 3 会从当前 ChatGPT 页面提取真实对话文本、代码块和链接。
-- 当前版本尚未完整下载生成图片、文件、HTML artifacts 或 Markdown artifacts。这些计划在 Milestone 4 改进。
-- 重复导入同一对话时，会覆盖确定性的 conversation folder。
+部分 ChatGPT 资源可能无法自动保存，尤其是 blob URL、受保护 URL，或需要 ChatGPT 私有后端访问的 artifact。工具不会静默丢弃它们，而是记录到 `assets_manifest.json`。
+
+重复导入同一对话时，会覆盖该项目下确定性的对话目录。
 
 ## 安全说明
 
 - Bridge 只绑定到 `127.0.0.1`。
-- Bridge 只会写入配置好的项目目录。
+- Bridge 只写入显式配置的项目目录或本地导出目录。
 - 路径穿越会被拒绝。
 - 本工具不会上传对话内容。
 - 项目刻意不使用 ChatGPT 私有 API。
-
-更多细节见：[安全说明](docs/security.zh-CN.md)。

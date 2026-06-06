@@ -1,4 +1,5 @@
 import { runInitCommand } from "./commands/init.js";
+import { runProjectCommand } from "./commands/project.js";
 import { runSetProjectCommand } from "./commands/setProject.js";
 import { runStartCommand } from "./commands/start.js";
 import { runStatusCommand } from "./commands/status.js";
@@ -6,7 +7,7 @@ import { logger } from "../utils/logger.js";
 
 export async function runCli(argv: string[]): Promise<void> {
   const normalizedArgv = argv[0] === "--" ? argv.slice(1) : argv;
-  const [command = "start", subcommand, value] = normalizedArgv;
+  const [command = "start", subcommand, value, extraValue] = normalizedArgv;
 
   if (command === "init") {
     await runInitCommand();
@@ -25,6 +26,11 @@ export async function runCli(argv: string[]): Promise<void> {
 
   if (command === "config" && subcommand === "set-project") {
     await runSetProjectCommand(value);
+    return;
+  }
+
+  if (command === "project") {
+    await runProjectCommand(subcommand, value, extraValue);
     return;
   }
 

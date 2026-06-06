@@ -5,9 +5,10 @@ export async function runInitCommand(): Promise<void> {
   const config = await initializeBridgeConfig();
   logger.info(`Config ready at ${getConfigPath()}`);
   logger.info(`Port: ${config.port}`);
-  if (config.defaultProjectPath) {
-    logger.info(`Default project path: ${config.defaultProjectPath}`);
+  const defaultProject = config.projects.find((project) => project.id === config.defaultProjectId);
+  if (defaultProject) {
+    logger.info(`Default project: ${defaultProject.id} -> ${defaultProject.path}`);
   } else {
-    logger.info("Default project path is not configured yet");
+    logger.info("No Codex project is configured yet");
   }
 }

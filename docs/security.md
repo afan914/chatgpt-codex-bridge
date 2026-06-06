@@ -2,54 +2,50 @@
 
 ## Local-only Bridge Model
 
-The Bridge listens only on `127.0.0.1`. It must never listen on `0.0.0.0` because it can write files into the configured project directory.
+The Bridge listens only on `127.0.0.1`. It must never listen on `0.0.0.0` because it can write files into configured project directories.
 
-## Local-only Extraction
+## Project Registry Security
 
-Conversation content is read by the content script from the current ChatGPT page. It is sent only to the local Bridge at `127.0.0.1`, and the Bridge writes to the configured local project directory. The tool does not upload conversation content to any remote server.
+1. Bridge only writes to explicitly configured project paths.
+2. Bridge does not scan the filesystem.
+3. Project paths are configured by the user.
+4. The extension only receives the configured project list from the local Bridge.
 
-## No Remote Upload
+## Package Export Security
 
-The Bridge writes files locally and does not upload ChatGPT content to remote services.
+1. Packages are written locally under the Bridge export directory.
+2. Implementation uses `os.homedir()` and `path.join()` to resolve the export directory.
+3. Packages may contain private conversation content.
+4. Users should review packages before sharing.
+
+## Asset Security
+
+1. Assets may contain private or sensitive content.
+2. Saved assets are written locally into the configured project directory or exported package.
+3. Nothing is uploaded to remote services.
+4. Users should review generated assets before committing to public repositories.
+
+## URL Handling
+
+1. The tool does not bypass browser security.
+2. The tool does not call private ChatGPT APIs.
+3. Protected or inaccessible URLs are recorded as unresolved or failed.
+4. Asset failure reasons are standardized and do not expose secret data.
+
+## Path Safety
+
+1. Asset filenames are sanitized.
+2. Asset files are only written inside the export directory.
+3. Path traversal is blocked.
 
 ## Browser Extension Permissions
 
-The extension uses narrow Manifest V3 permissions:
-
 - `activeTab` and `tabs` read the current tab title and URL so the popup can detect ChatGPT pages.
-- `storage` persists the selected language.
+- `storage` persists language and selected project ID.
 - Host permissions are limited to ChatGPT domains and the local Bridge address.
 
 The extension does not request `<all_urls>`.
 
-## Path Traversal Prevention
-
-The writer constructs output paths from a sanitized conversation slug and verifies that the final path stays inside the configured project directory.
-
-## Project Directory Restrictions
-
-The user must explicitly configure a project directory:
-
-```bash
-pnpm dev:bridge -- config set-project /path/to/project
-```
-
-Imports are rejected when no project path is configured or when the configured path does not exist.
-
-## Sensitive Data Considerations
-
-ChatGPT conversations can contain private product plans, code, credentials, or personal data. Treat generated `.codex-context/` folders as sensitive project files.
-
-Do not commit generated context exports unless you have reviewed them.
-
 ## Private ChatGPT APIs
 
-The project intentionally avoids private ChatGPT APIs. The extension reads visible page DOM. It does not call private ChatGPT backend APIs, bypass authentication, or scrape account history.
-
-## i18n Storage
-
-The extension stores only the selected locale, such as `"en"` or `"zh"`, in `chrome.storage.local`. It does not store conversation content in browser storage.
-
-## Data Sensitivity
-
-The exported context may contain private conversation content. Users should review generated files before committing them to a public repository.
+The project intentionally avoids private ChatGPT APIs. The extension reads visible page DOM only.

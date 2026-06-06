@@ -26,8 +26,13 @@ export interface ChatGPTMessage {
   codeBlocks?: ExtractedCodeBlock[];
 }
 
+export type ImportDestination =
+  | { type: "codex_project"; projectId?: string }
+  | { type: "package" };
+
 export interface ImportChatGPTContextPayload {
   conversation: ConversationMetadata;
   messages: ChatGPTMessage[];
   assets?: AssetReference[];
+  destination?: ImportDestination;
 }

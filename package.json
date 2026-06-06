@@ -6,12 +6,12 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev:bridge": "pnpm --filter bridge dev",
-    "build:bridge": "pnpm --filter bridge build",
-    "build:extension": "pnpm --filter extension build",
-    "build": "pnpm -r build",
-    "typecheck": "pnpm -r typecheck",
-    "lint": "pnpm -r lint"
+    "dev:bridge": "corepack pnpm --filter bridge dev",
+    "build:bridge": "corepack pnpm --filter bridge build",
+    "build:extension": "corepack pnpm --filter extension build",
+    "build": "corepack pnpm -r build",
+    "typecheck": "corepack pnpm -r typecheck",
+    "lint": "corepack pnpm -r lint"
   },
   "devDependencies": {
     "@types/node": "^20.14.10",

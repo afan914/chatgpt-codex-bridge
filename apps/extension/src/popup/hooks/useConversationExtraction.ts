@@ -7,6 +7,9 @@ export type ExtractionSummary = {
   codeBlockCount: number;
   linkCount: number;
   assetCount: number;
+  savedAssetCount: number;
+  unresolvedAssetCount: number;
+  failedAssetCount: number;
 };
 
 type ExtractConversationResponse =
@@ -61,7 +64,7 @@ export function useConversationExtraction(input: UseConversationExtractionInput)
       setExtractionStatus({
         status: "error",
         code: "NO_TAB_ID",
-        message: "Could not communicate with the content script"
+        message: "Could not read the ChatGPT page"
       });
       return;
     }

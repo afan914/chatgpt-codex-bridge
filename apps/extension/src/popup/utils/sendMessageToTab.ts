@@ -13,7 +13,7 @@ export async function sendMessageToTab<TResponse>(
         if (lastError) {
           resolve({
             ok: false,
-            message: lastError.message || "Could not communicate with the content script",
+            message: lastError.message || "Could not read the ChatGPT page",
             rawMessage: lastError.message
           });
           return;
@@ -25,7 +25,7 @@ export async function sendMessageToTab<TResponse>(
         });
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Could not communicate with the content script";
+      const message = error instanceof Error ? error.message : "Could not read the ChatGPT page";
       resolve({
         ok: false,
         message,

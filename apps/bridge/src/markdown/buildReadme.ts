@@ -16,5 +16,13 @@ It contains the current ChatGPT conversation and related extracted artifacts.
 ## Recommended usage
 
 Ask Codex to read \`CODEX_TASK.md\` first.
+
+Then ask Codex to review \`full_conversation.md\` and \`assets_manifest.json\` before changing code.
+
+## Assets
+
+Assets are saved on a best-effort basis. Supported content assets, snippets, and data URL images are written into \`assets/\`.
+
+Some ChatGPT assets may remain unresolved or fail to save, especially blob URLs, protected URLs, or links that require private ChatGPT access. Those entries remain visible in \`assets_manifest.json\` with their status and reason.
 `;
 }

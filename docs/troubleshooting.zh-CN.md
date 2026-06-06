@@ -107,15 +107,15 @@ https://chatgpt.com
 
 ## 代码块缺失
 
-Milestone 3 会提取常见的 `pre code` 代码块。如果 ChatGPT 改变代码块结构，可能需要更新 selector。
+当前版本会提取常见的 `pre code` 代码块。如果 ChatGPT 改变代码块结构，可能需要更新 selector。
 
 ## 链接缺失
 
-Milestone 3 会提取标准 anchor 链接。一些 UI 生成的链接可能不会被包含。
+当前版本会提取标准 anchor 链接。一些 UI 生成的链接可能不会被包含。
 
 ## Assets 未解析
 
-Milestone 3 可能检测图片或可下载链接，但不会下载文件。完整 asset 提取计划在 Milestone 4 实现。
+当前版本会尽力保存支持的资源，并把无法自动保存的资源记录到 `assets_manifest.json`。
 
 ## CORS 错误
 

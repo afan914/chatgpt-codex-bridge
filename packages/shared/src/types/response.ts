@@ -15,10 +15,24 @@ export interface HealthResponse {
   version: string;
 }
 
+export interface ProjectListItem {
+  id: string;
+  name: string;
+  path: string;
+  isDefault: boolean;
+}
+
+export interface ProjectsResponse {
+  ok: true;
+  projects: ProjectListItem[];
+}
+
 export interface ImportSuccessResponse {
   ok: true;
+  mode: "codex_project" | "package";
   conversationSlug: string;
-  outputDir: string;
+  outputDir?: string;
+  packagePath?: string;
   filesWritten: string[];
 }
 

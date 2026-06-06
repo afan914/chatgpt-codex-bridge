@@ -7,6 +7,9 @@ export type ExtractionSummary = {
   codeBlockCount: number;
   linkCount: number;
   assetCount: number;
+  savedAssetCount: number;
+  unresolvedAssetCount: number;
+  failedAssetCount: number;
 };
 
 export type ExtractConversationResponse =
@@ -35,8 +38,8 @@ export function extractConversation(): ExtractConversationResponse {
     };
   }
 
-  const assets: AssetReference[] = extractedMessages.flatMap(({ element, message }) =>
-    extractAssets(element, message.index)
+  const assets = normalizeAssetIds(
+    extractedMessages.flatMap(({ element, message }) => extractAssets(element, message.index, message.codeBlocks ?? []))
   );
   const messages = extractedMessages.map(({ message }) => message);
   const payload: ImportChatGPTContextPayload = {
@@ -56,9 +59,19 @@ export function extractConversation(): ExtractConversationResponse {
       messageCount: messages.length,
       codeBlockCount: messages.reduce((count, message) => count + (message.codeBlocks?.length ?? 0), 0),
       linkCount: messages.reduce((count, message) => count + (message.links?.length ?? 0), 0),
-      assetCount: assets.length
+      assetCount: assets.length,
+      savedAssetCount: assets.filter((asset) => asset.status === "saved").length,
+      unresolvedAssetCount: assets.filter((asset) => asset.status === "unresolved").length,
+      failedAssetCount: assets.filter((asset) => asset.status === "failed").length
     }
   };
+}
+
+function normalizeAssetIds(assets: AssetReference[]): AssetReference[] {
+  return assets.map((asset, index) => ({
+    ...asset,
+    id: asset.id || `asset-${String(index + 1).padStart(3, "0")}`
+  }));
 }
 
 function getConversationTitle(): string {

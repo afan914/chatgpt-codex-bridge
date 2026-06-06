@@ -20,11 +20,19 @@ export function sendApiError(response: ServerResponse, statusCode: number, code:
 export function errorToApiError(error: unknown): { statusCode: number; code: string; message: string } {
   const message = error instanceof Error ? error.message : "WRITE_FAILED";
 
-  if (message === "PROJECT_PATH_NOT_CONFIGURED") {
+  if (message === "PROJECT_PATH_NOT_CONFIGURED" || message === "NO_PROJECT_CONFIGURED") {
+    return {
+      statusCode: 400,
+      code: "NO_PROJECT_CONFIGURED",
+      message: "No Codex project configured. Run: chatgpt-codex-bridge project add <id> <path>"
+    };
+  }
+
+  if (message === "PROJECT_NOT_FOUND") {
     return {
       statusCode: 400,
       code: message,
-      message: "No project path configured. Run: chatgpt-codex-bridge config set-project <path>"
+      message: "Requested Codex project was not found"
     };
   }
 

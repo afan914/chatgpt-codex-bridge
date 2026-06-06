@@ -4,6 +4,7 @@ import { applyCorsHeaders, handleCorsPreflight } from "./middleware/cors.js";
 import { sendApiError } from "./middleware/errorHandler.js";
 import { handleHealth } from "./routes/health.js";
 import { handleImportChatGPTContext } from "./routes/importChatGPTContext.js";
+import { handleProjects } from "./routes/projects.js";
 
 export function createBridgeServer(config: BridgeConfig, version: string): http.Server {
   return http.createServer(async (request, response) => {
@@ -17,6 +18,11 @@ export function createBridgeServer(config: BridgeConfig, version: string): http.
 
     if (request.method === "GET" && url.pathname === "/health") {
       handleHealth(response, version);
+      return;
+    }
+
+    if (request.method === "GET" && url.pathname === "/projects") {
+      await handleProjects(response);
       return;
     }
 
