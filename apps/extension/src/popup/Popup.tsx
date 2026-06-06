@@ -354,7 +354,11 @@ function getExtractionErrorMessage(locale: Parameters<typeof t>[0], code: string
     return t(locale, "refreshPageAndRetry");
   }
 
-  if (code === "CONTENT_SCRIPT_CONNECTION_FAILED" || code === "NO_TAB_ID") {
+  if (code === "CONTENT_SCRIPT_CONNECTION_FAILED") {
+    return message || t(locale, "refreshPageAndRetry");
+  }
+
+  if (code === "NO_TAB_ID") {
     return t(locale, "refreshPageAndRetry");
   }
 
