@@ -3,7 +3,7 @@ export async function sendMessageToTab<TResponse>(
   message: unknown
 ): Promise<
   | { ok: true; response: TResponse }
-  | { ok: false; message: string }
+  | { ok: false; message: string; rawMessage?: string }
 > {
   return new Promise((resolve) => {
     try {
@@ -13,7 +13,8 @@ export async function sendMessageToTab<TResponse>(
         if (lastError) {
           resolve({
             ok: false,
-            message: lastError.message || "Could not communicate with the content script"
+            message: lastError.message || "Could not communicate with the content script",
+            rawMessage: lastError.message
           });
           return;
         }
@@ -24,9 +25,11 @@ export async function sendMessageToTab<TResponse>(
         });
       });
     } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not communicate with the content script";
       resolve({
         ok: false,
-        message: error instanceof Error ? error.message : "Could not communicate with the content script"
+        message,
+        rawMessage: message
       });
     }
   });

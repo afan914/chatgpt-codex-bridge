@@ -4,12 +4,12 @@
 
 你会在自己的电脑上设置两个本地组件：
 
-- 浏览器扩展弹窗检查 ChatGPT 页面，并发送 mock 对话 payload。
+- 浏览器扩展弹窗检查 ChatGPT 页面，并发送当前真实对话。
 - 本地 Bridge 在你的电脑上运行。
 - Bridge 把对话上下文写入你的 Codex 项目文件夹。
 - 这个工具不会把内容上传到远程服务器。
 
-Milestone 2 包含本地 Bridge 和浏览器扩展弹窗。真实 ChatGPT 对话提取会在 Milestone 3 实现。
+Milestone 3 包含本地 Bridge、浏览器扩展弹窗和真实 ChatGPT 对话提取。
 
 ## 第 1 步：安装 Node.js
 
@@ -149,6 +149,7 @@ chatgpt-codex-bridge/apps/extension/dist
 
    * Bridge connected
    * ChatGPT page detected
+   * Conversation extracted
 4. 如有需要，切换语言。
 5. 点击 “Send to Codex”。
 6. 打开你配置的 Codex 项目文件夹。
@@ -158,7 +159,7 @@ chatgpt-codex-bridge/apps/extension/dist
 .codex-context/chatgpt/
 ```
 
-当前阶段，Send to Codex 使用 mock conversation payload。这用于验证扩展可以和本地 Bridge 通信。下一阶段扩展会提取真实 ChatGPT 对话。
+当前版本会提取真实对话文本、代码块和链接。它可能还不会保存生成图片、可下载文件或 ChatGPT artifacts，这些会在后续 milestone 改进。
 
 你也可以用下面命令直接测试 Bridge：
 
@@ -177,6 +178,8 @@ curl -X POST http://127.0.0.1:17321/import-chatgpt-context \
 ```
 
 然后基于这份上下文继续实现。
+
+如果 popup 提示无法访问 ChatGPT 页面，请刷新 ChatGPT 页面并重新打开 popup。重新加载扩展后，content script 需要重新注入页面，这种情况是正常的。
 
 ## 故障排查
 

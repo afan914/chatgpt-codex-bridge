@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { t } from "@chatgpt-codex-bridge/shared";
 import type { SendToBridgeResult } from "../bridge/bridgeClient";
 import { sendPayloadToBridge } from "../bridge/bridgeClient";
@@ -10,7 +10,6 @@ import { useBridgeStatus } from "./hooks/useBridgeStatus";
 import { useConversationExtraction } from "./hooks/useConversationExtraction";
 import { useCurrentTab } from "./hooks/useCurrentTab";
 import { useLocale } from "./hooks/useLocale";
-import { buildMockPayload } from "./mockPayload";
 
 export function Popup(): JSX.Element {
   const { locale, setLocale } = useLocale();
@@ -20,8 +19,6 @@ export function Popup(): JSX.Element {
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [sendResult, setSendResult] = useState<SendToBridgeResult | undefined>();
 
-  const currentTabTitle = currentTab.status === "ready" ? currentTab.title : undefined;
-  const currentTabUrl = currentTab.status === "ready" ? currentTab.url : undefined;
   const isCurrentTabChatGPT = currentTab.status === "ready" && currentTab.isChatGPTPage;
   const currentTabId = currentTab.status === "ready" ? currentTab.tabId : undefined;
   const { extractionStatus, retry: retryExtraction } = useConversationExtraction({
@@ -29,23 +26,17 @@ export function Popup(): JSX.Element {
     isChatGPTPage: isCurrentTabChatGPT
   });
 
-  const mockPayloadPreview = useMemo(
-    () => buildMockPayload({ title: currentTabTitle, url: currentTabUrl }),
-    [currentTabTitle, currentTabUrl]
-  );
-
-  const messageCount = mockPayloadPreview.messages.length;
-  const codeBlockCount = mockPayloadPreview.messages.reduce(
-    (count, message) => count + (message.codeBlocks?.length ?? 0),
-    0
-  );
-  const assetCount = mockPayloadPreview.assets?.length ?? 0;
+  const extractionSummary =
+    extractionStatus.status === "success"
+      ? extractionStatus.summary
+      : { messageCount: 0, codeBlockCount: 0, linkCount: 0, assetCount: 0 };
 
   const disabledReason = getDisabledReason({
     bridgeStatus: bridgeStatus.status,
     currentTabStatus: currentTab.status,
     isCurrentTabChatGPT,
     extractionStatus: extractionStatus.status,
+    extractedMessageCount: extractionSummary.messageCount,
     isSending
   });
   const isSendDisabled = disabledReason !== undefined;
@@ -64,17 +55,19 @@ export function Popup(): JSX.Element {
       return;
     }
 
-    if (extractionStatus.status !== "ready") {
+    if (extractionStatus.status !== "success") {
       setErrorMessage(`${t(locale, "contentScriptUnavailable")} ${t(locale, "refreshChatGPTPageHint")}`);
       return;
     }
 
     setIsSending(true);
-    const freshPayload = buildMockPayload({
-      title: currentTab.title,
-      url: currentTab.url
+    const result = await sendPayloadToBridge({
+      ...extractionStatus.payload,
+      conversation: {
+        ...extractionStatus.payload.conversation,
+        exportedAt: new Date().toISOString()
+      }
     });
-    const result = await sendPayloadToBridge(freshPayload);
     setIsSending(false);
 
     if (!result.ok) {
@@ -90,7 +83,7 @@ export function Popup(): JSX.Element {
       <header className="popup__header">
         <div>
           <h1>{t(locale, "extensionTitle")}</h1>
-          <p>{t(locale, "mockPayloadNotice")}</p>
+          <p>{t(locale, "realExtractionNotice")}</p>
         </div>
         <LanguageToggle
           locale={locale}
@@ -141,19 +134,23 @@ export function Popup(): JSX.Element {
       </section>
 
       <section className="panel">
-        <h2>{t(locale, "mockExtractionSummary")}</h2>
+        <h2>{t(locale, "extractionSummary")}</h2>
         <dl className="summary-grid">
           <div>
             <dt>{t(locale, "messageCount")}</dt>
-            <dd>{messageCount}</dd>
+            <dd>{extractionSummary.messageCount}</dd>
           </div>
           <div>
             <dt>{t(locale, "codeBlockCount")}</dt>
-            <dd>{codeBlockCount}</dd>
+            <dd>{extractionSummary.codeBlockCount}</dd>
+          </div>
+          <div>
+            <dt>{t(locale, "linkCount")}</dt>
+            <dd>{extractionSummary.linkCount}</dd>
           </div>
           <div>
             <dt>{t(locale, "assetCount")}</dt>
-            <dd>{assetCount}</dd>
+            <dd>{extractionSummary.assetCount}</dd>
           </div>
         </dl>
       </section>
@@ -168,16 +165,19 @@ export function Popup(): JSX.Element {
           )}
         </div>
         {!isCurrentTabChatGPT && <StatusBadge status="neutral">{t(locale, "currentPageNotChatGPT")}</StatusBadge>}
-        {isCurrentTabChatGPT && extractionStatus.status === "checking" && (
-          <StatusBadge status="neutral">{t(locale, "checkingExtraction")}</StatusBadge>
+        {isCurrentTabChatGPT && extractionStatus.status === "idle" && (
+          <StatusBadge status="neutral">{t(locale, "extractingConversation")}</StatusBadge>
         )}
-        {isCurrentTabChatGPT && extractionStatus.status === "ready" && (
-          <StatusBadge status="success">{t(locale, "contentScriptReady")}</StatusBadge>
+        {isCurrentTabChatGPT && extractionStatus.status === "extracting" && (
+          <StatusBadge status="neutral">{t(locale, "extractingConversation")}</StatusBadge>
         )}
-        {isCurrentTabChatGPT && extractionStatus.status === "failed" && (
+        {isCurrentTabChatGPT && extractionStatus.status === "success" && (
+          <StatusBadge status="success">{t(locale, "conversationExtracted")}</StatusBadge>
+        )}
+        {isCurrentTabChatGPT && extractionStatus.status === "error" && (
           <div className="stack">
-            <StatusBadge status="error">{t(locale, extractionStatus.messageKey)}</StatusBadge>
-            {extractionStatus.hintKey && <span className="meta">{t(locale, extractionStatus.hintKey)}</span>}
+            <StatusBadge status="error">{t(locale, "conversationExtractionFailed")}</StatusBadge>
+            <span className="meta">{getExtractionErrorMessage(locale, extractionStatus.code, extractionStatus.message)}</span>
           </div>
         )}
       </section>
@@ -198,7 +198,7 @@ export function Popup(): JSX.Element {
         disabled={isSendDisabled}
         isSending={isSending}
         onClick={() => void handleSend()}
-        label={t(locale, "sendToCodex")}
+        label={t(locale, "sendRealConversation")}
         sendingLabel={t(locale, "sending")}
       />
     </main>
@@ -209,7 +209,8 @@ type DisabledReasonInput = {
   bridgeStatus: "checking" | "connected" | "disconnected";
   currentTabStatus: "loading" | "ready" | "error";
   isCurrentTabChatGPT: boolean;
-  extractionStatus: "idle" | "checking" | "ready" | "failed";
+  extractionStatus: "idle" | "extracting" | "success" | "error";
+  extractedMessageCount: number;
   isSending: boolean;
 };
 
@@ -218,6 +219,9 @@ type DisabledReason =
   | "buttonDisabledChecking"
   | "buttonDisabledNotChatGPT"
   | "buttonDisabledContentScriptUnavailable"
+  | "buttonDisabledExtracting"
+  | "buttonDisabledExtractionFailed"
+  | "buttonDisabledNoMessages"
   | "sending";
 
 function getDisabledReason(input: DisabledReasonInput): DisabledReason | undefined {
@@ -237,13 +241,33 @@ function getDisabledReason(input: DisabledReasonInput): DisabledReason | undefin
     return "buttonDisabledNotChatGPT";
   }
 
-  if (input.extractionStatus === "checking" || input.extractionStatus === "idle") {
-    return "buttonDisabledChecking";
+  if (input.extractionStatus === "extracting" || input.extractionStatus === "idle") {
+    return "buttonDisabledExtracting";
   }
 
-  if (input.extractionStatus === "failed") {
-    return "buttonDisabledContentScriptUnavailable";
+  if (input.extractionStatus === "error") {
+    return "buttonDisabledExtractionFailed";
+  }
+
+  if (input.extractedMessageCount === 0) {
+    return "buttonDisabledNoMessages";
   }
 
   return undefined;
+}
+
+function getExtractionErrorMessage(locale: Parameters<typeof t>[0], code: string | undefined, message: string): string {
+  if (code === "CONTENT_SCRIPT_UNAVAILABLE") {
+    return `${t(locale, "contentScriptUnavailable")} ${t(locale, "refreshChatGPTPageHint")}`;
+  }
+
+  if (code === "CONTENT_SCRIPT_CONNECTION_FAILED" || code === "NO_TAB_ID") {
+    return t(locale, "contentScriptConnectionFailed");
+  }
+
+  if (code === "NO_MESSAGES_DETECTED") {
+    return t(locale, "noExtractedMessages");
+  }
+
+  return message || t(locale, "conversationExtractionFailed");
 }

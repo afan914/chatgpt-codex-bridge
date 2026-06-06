@@ -42,7 +42,7 @@ pnpm dev:bridge -- config set-project /path/to/your/codex/project
 
 ## Current Page Is Not ChatGPT
 
-Milestone 2 only enables Send to Codex on ChatGPT pages. Open:
+Send to Codex is enabled only on ChatGPT pages after extraction succeeds. Open:
 
 ```text
 https://chatgpt.com
@@ -57,7 +57,9 @@ Possible causes:
 1. Bridge disconnected.
 2. Bridge status is still checking.
 3. Current page is not ChatGPT.
-4. Send request is already in progress.
+4. Conversation extraction is still running or failed.
+5. No messages were detected.
+6. Send request is already in progress.
 
 Check the status messages in the popup.
 
@@ -73,7 +75,47 @@ Reload the extension and switch language again.
 
 ## No Messages Detected
 
-Real DOM extraction starts in Milestone 3. If this appears later, refresh the ChatGPT page and verify that the conversation messages are visible.
+Possible causes:
+
+1. The conversation is empty.
+2. The page is still loading.
+3. DOM selectors no longer match.
+4. You are on a ChatGPT page but not a conversation page.
+
+Fix:
+
+1. Open a specific ChatGPT conversation.
+2. Refresh the page.
+3. Try again.
+
+## Conversation Extraction Failed
+
+Possible causes:
+
+1. ChatGPT page has not fully loaded.
+2. Extension was reloaded after the page loaded.
+3. Content script is unavailable.
+4. ChatGPT DOM changed.
+5. Current page is not a conversation page.
+
+Fix:
+
+1. Refresh the ChatGPT page.
+2. Wait until the conversation is visible.
+3. Reopen the popup.
+4. Click Retry extraction.
+
+## Code Blocks Missing
+
+Milestone 3 extracts common `pre code` blocks. If ChatGPT changes its code block structure, extraction may need selector updates.
+
+## Links Missing
+
+Milestone 3 extracts standard anchor links. Some UI-generated links may not be included.
+
+## Assets Unresolved
+
+Milestone 3 may detect images or downloadable links but does not download files yet. Full asset extraction is planned for Milestone 4.
 
 ## CORS Error
 

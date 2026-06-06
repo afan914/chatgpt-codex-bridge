@@ -18,7 +18,7 @@ pnpm typecheck
 pnpm lint
 ```
 
-Milestone 2 中 extension 的 build 和 lint 命令已经是真实实现。
+Milestone 3 中 extension 的 build、lint、popup 和真实提取流程已经是真实实现。
 
 ## 以开发模式运行 Bridge
 
@@ -72,19 +72,21 @@ pnpm dev:bridge
 2. 重新打开 popup。
 3. 确认显示 Bridge 未连接。
 
-## 使用 Mock Payload 测试 Send to Codex
+## 使用真实提取测试 Send to Codex
 
 1. 启动 Bridge。
-2. 打开 ChatGPT 页面。
+2. 打开真实 ChatGPT 对话。
 3. 打开 popup。
-4. 点击 Send to Codex。
-5. 确认文件出现在：
+4. 确认提取状态成功。
+5. 确认消息数大于 0。
+6. 点击 Send to Codex。
+7. 确认文件出现在：
 
 ```text
 <project-root>/.codex-context/chatgpt/
 ```
 
-Milestone 2 发送的是 mock payload。真实 ChatGPT DOM 提取会在 Milestone 3 实现。
+Milestone 3 默认发送真实提取的 ChatGPT 对话。
 
 ## 测试 i18n
 

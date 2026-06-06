@@ -42,7 +42,7 @@ pnpm dev:bridge -- config set-project /path/to/your/codex/project
 
 ## 当前页面不是 ChatGPT
 
-Milestone 2 只允许在 ChatGPT 页面上使用 Send to Codex。请打开：
+只有在 ChatGPT 页面且提取成功后才能使用 Send to Codex。请打开：
 
 ```text
 https://chatgpt.com
@@ -57,7 +57,9 @@ https://chatgpt.com
 1. Bridge 未连接。
 2. Bridge 状态仍在检查。
 3. 当前页面不是 ChatGPT。
-4. 发送请求正在进行中。
+4. 对话提取仍在进行或失败。
+5. 未检测到消息。
+6. 发送请求正在进行中。
 
 请查看 popup 中的状态提示。
 
@@ -73,7 +75,47 @@ https://chatgpt.com
 
 ## 未检测到消息
 
-真实 DOM 提取会在 Milestone 3 实现。如果后续出现这个提示，请刷新 ChatGPT 页面，并确认对话消息在页面上可见。
+可能原因：
+
+1. 对话为空。
+2. 页面仍在加载。
+3. DOM selector 已不匹配。
+4. 当前是 ChatGPT 页面，但不是具体对话页。
+
+修复方式：
+
+1. 打开一个具体 ChatGPT 对话。
+2. 刷新页面。
+3. 重试。
+
+## 对话提取失败
+
+可能原因：
+
+1. ChatGPT 页面还没有完全加载。
+2. 页面加载后扩展被重新加载过。
+3. content script 不可用。
+4. ChatGPT DOM 发生变化。
+5. 当前页面不是具体对话页。
+
+修复方式：
+
+1. 刷新 ChatGPT 页面。
+2. 等待对话可见。
+3. 重新打开 popup。
+4. 点击重试提取。
+
+## 代码块缺失
+
+Milestone 3 会提取常见的 `pre code` 代码块。如果 ChatGPT 改变代码块结构，可能需要更新 selector。
+
+## 链接缺失
+
+Milestone 3 会提取标准 anchor 链接。一些 UI 生成的链接可能不会被包含。
+
+## Assets 未解析
+
+Milestone 3 可能检测图片或可下载链接，但不会下载文件。完整 asset 提取计划在 Milestone 4 实现。
 
 ## CORS 错误
 

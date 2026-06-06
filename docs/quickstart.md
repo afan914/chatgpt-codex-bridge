@@ -4,12 +4,12 @@
 
 You will set up two local pieces:
 
-- The browser extension popup checks ChatGPT pages and sends a mock conversation payload.
+- The browser extension popup checks ChatGPT pages and sends the real current conversation.
 - The local Bridge runs on your computer.
 - The Bridge writes the conversation context into your Codex project folder.
 - Nothing is uploaded to a remote server by this tool.
 
-Milestone 2 includes the local Bridge and the browser extension popup. Real ChatGPT conversation extraction will arrive in Milestone 3.
+Milestone 3 includes the local Bridge, browser extension popup, and real ChatGPT conversation extraction.
 
 ## Step 1: Install Node.js
 
@@ -143,14 +143,13 @@ chatgpt-codex-bridge/apps/extension/dist
 
 ## Step 9: Test the full flow
 
-After Milestone 2:
-
-1. Open a ChatGPT conversation.
+1. Open a real ChatGPT conversation.
 2. Click the extension icon.
 3. Confirm:
 
    * Bridge connected
    * ChatGPT page detected
+   * Conversation extracted
 4. Switch language if needed.
 5. Click "Send to Codex".
 6. Open your configured Codex project folder.
@@ -160,7 +159,7 @@ After Milestone 2:
 .codex-context/chatgpt/
 ```
 
-At this stage, Send to Codex uses a mock conversation payload. This verifies that the extension can talk to the local Bridge. In the next milestone, the extension will extract the real ChatGPT conversation.
+This version extracts the real conversation text, code blocks, and links. It may not yet save generated images, downloadable files, or ChatGPT artifacts. Those will be improved in a later milestone.
 
 You can also test the Bridge directly with:
 
@@ -179,6 +178,8 @@ In Codex App, ask Codex to read:
 ```
 
 Then continue the implementation based on that context.
+
+If the popup says it cannot access the ChatGPT page, refresh the ChatGPT page and reopen the popup. This can happen after reloading the extension because the content script needs to be injected into the page again.
 
 ## Troubleshooting
 

@@ -1,16 +1,42 @@
 import { useCallback, useEffect, useState } from "react";
-import type { TranslationKey } from "@chatgpt-codex-bridge/shared";
+import type { ImportChatGPTContextPayload } from "@chatgpt-codex-bridge/shared";
 import { sendMessageToTab } from "../utils/sendMessageToTab";
 
-type ContentScriptPingResponse = {
-  ok: boolean;
+export type ExtractionSummary = {
+  messageCount: number;
+  codeBlockCount: number;
+  linkCount: number;
+  assetCount: number;
 };
+
+type ExtractConversationResponse =
+  | {
+      ok: true;
+      payload: ImportChatGPTContextPayload;
+      summary: ExtractionSummary;
+    }
+  | {
+      ok: false;
+      error: {
+        code: string;
+        message: string;
+      };
+    };
 
 export type ConversationExtractionState =
   | { status: "idle" }
-  | { status: "checking" }
-  | { status: "ready" }
-  | { status: "failed"; messageKey: TranslationKey; hintKey?: TranslationKey };
+  | { status: "extracting" }
+  | {
+      status: "success";
+      payload: ImportChatGPTContextPayload;
+      summary: ExtractionSummary;
+    }
+  | {
+      status: "error";
+      code?: string;
+      message: string;
+      rawMessage?: string;
+    };
 
 type UseConversationExtractionInput = {
   tabId?: number;
@@ -33,29 +59,43 @@ export function useConversationExtraction(input: UseConversationExtractionInput)
 
     if (input.tabId === undefined) {
       setExtractionStatus({
-        status: "failed",
-        messageKey: "contentScriptConnectionFailed",
-        hintKey: "refreshChatGPTPageHint"
+        status: "error",
+        code: "NO_TAB_ID",
+        message: "Could not communicate with the content script"
       });
       return;
     }
 
-    setExtractionStatus({ status: "checking" });
-    const result = await sendMessageToTab<ContentScriptPingResponse>(input.tabId, {
-      type: "CHATGPT_CODEX_BRIDGE_PING"
+    setExtractionStatus({ status: "extracting" });
+    const messageResult = await sendMessageToTab<ExtractConversationResponse>(input.tabId, {
+      type: "EXTRACT_CHATGPT_CONVERSATION"
     });
 
-    if (result.ok && result.response.ok) {
-      setExtractionStatus({ status: "ready" });
+    if (!messageResult.ok) {
+      setExtractionStatus({
+        status: "error",
+        code: isReceivingEndMissing(messageResult.rawMessage ?? messageResult.message)
+          ? "CONTENT_SCRIPT_UNAVAILABLE"
+          : "CONTENT_SCRIPT_CONNECTION_FAILED",
+        message: messageResult.message,
+        rawMessage: messageResult.rawMessage
+      });
+      return;
+    }
+
+    if (!messageResult.response.ok) {
+      setExtractionStatus({
+        status: "error",
+        code: messageResult.response.error.code,
+        message: messageResult.response.error.message
+      });
       return;
     }
 
     setExtractionStatus({
-      status: "failed",
-      messageKey: isReceivingEndMissing(result.ok ? "" : result.message)
-        ? "contentScriptUnavailable"
-        : "contentScriptConnectionFailed",
-      hintKey: "refreshChatGPTPageHint"
+      status: "success",
+      payload: messageResult.response.payload,
+      summary: messageResult.response.summary
     });
   }, [input.isChatGPTPage, input.tabId]);
 

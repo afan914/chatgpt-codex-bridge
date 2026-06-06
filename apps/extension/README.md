@@ -2,13 +2,21 @@
 
 ## Current Milestone
 
-Milestone 2 implements the Manifest V3 popup, Bridge health check, mock Send to Codex flow, ChatGPT page detection by URL, and English / Chinese switching.
+Milestone 3 implements real ChatGPT conversation extraction from the current page.
 
 The popup proves this local chain:
 
 ```text
-Extension popup -> local Bridge -> configured Codex project .codex-context/
+ChatGPT DOM -> content script -> extension popup -> local Bridge -> configured Codex project .codex-context/
 ```
+
+## What the Extension Does Now
+
+- Detects ChatGPT pages.
+- Requests content script extraction.
+- Extracts messages, roles, text, code blocks, and links.
+- Sends the real payload to the local Bridge.
+- Supports English / Chinese UI.
 
 ## Build
 
@@ -71,6 +79,16 @@ If Bridge is disconnected, the popup shows a translated hint and disables Send t
 
 The popup also pings the ChatGPT content script with `chrome.tabs.sendMessage`. If the content script is unavailable, the popup shows a translated refresh-page hint and disables Send to Codex.
 
+## Verify Content Script
+
+1. Confirm `dist/content.js` exists.
+2. Confirm `dist/manifest.json` references `content.js`.
+3. Open ChatGPT DevTools and look for:
+
+```text
+ChatGPT Context Bridge content script loaded
+```
+
 ## i18n
 
 The popup imports `t(locale, key)` and `Locale` from `@chatgpt-codex-bridge/shared`.
@@ -83,4 +101,6 @@ chatgptCodexBridge.locale
 
 ## Current Limitation
 
-This milestone sends a mock payload only. Real ChatGPT DOM extraction is not implemented yet and is planned for Milestone 3.
+- Full asset downloading is not implemented yet.
+- DOM extraction may require updates if ChatGPT changes page structure.
+- Refresh the ChatGPT page after reloading the extension.

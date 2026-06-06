@@ -4,9 +4,13 @@
 
 The Bridge listens only on `127.0.0.1`. It must never listen on `0.0.0.0` because it can write files into the configured project directory.
 
+## Local-only Extraction
+
+Conversation content is read by the content script from the current ChatGPT page. It is sent only to the local Bridge at `127.0.0.1`, and the Bridge writes to the configured local project directory. The tool does not upload conversation content to any remote server.
+
 ## No Remote Upload
 
-The Bridge writes files locally and does not upload ChatGPT content to remote services. Milestone 2 only sends a mock payload from the extension to the local Bridge. Future real conversation extraction must keep the same local-only model.
+The Bridge writes files locally and does not upload ChatGPT content to remote services.
 
 ## Browser Extension Permissions
 
@@ -40,8 +44,12 @@ Do not commit generated context exports unless you have reviewed them.
 
 ## Private ChatGPT APIs
 
-The project intentionally avoids private ChatGPT APIs. The extension will extract from the current page DOM in Milestone 3.
+The project intentionally avoids private ChatGPT APIs. The extension reads visible page DOM. It does not call private ChatGPT backend APIs, bypass authentication, or scrape account history.
 
 ## i18n Storage
 
 The extension stores only the selected locale, such as `"en"` or `"zh"`, in `chrome.storage.local`. It does not store conversation content in browser storage.
+
+## Data Sensitivity
+
+The exported context may contain private conversation content. Users should review generated files before committing them to a public repository.

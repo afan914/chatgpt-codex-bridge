@@ -9,11 +9,9 @@ The extension is responsible for browser-facing work:
 - Read the current tab URL and title.
 - Detect ChatGPT pages by URL.
 - Provide runtime English / Simplified Chinese switching.
-- Send a mock payload to the local Bridge in Milestone 2.
+- Send the extracted conversation payload to the local Bridge.
 
 The extension does not write files into the Codex project directory.
-
-In Milestone 2, the extension does not yet read the real ChatGPT DOM. The popup only verifies the browser extension -> Bridge -> project directory integration by sending a mock payload.
 
 ## Bridge Responsibilities
 
@@ -48,14 +46,39 @@ The shared package owns code used by both apps:
 ## Data Flow
 
 ```text
-ChatGPT page
--> Extension popup
--> Mock payload builder
+ChatGPT conversation DOM
+-> Content script
+-> Extract conversation payload
+-> Popup
 -> Bridge client
 -> Local Bridge HTTP API
 -> Context writer
 -> Codex project .codex-context/
 ```
+
+## Content Script Responsibilities
+
+- Listen for extraction requests.
+- Read the current page DOM.
+- Extract message order.
+- Detect message role.
+- Extract readable text.
+- Extract code blocks.
+- Extract links.
+- Detect unresolved asset references when simple.
+- Return a typed payload to the popup.
+
+The Bridge does not know how ChatGPT DOM is structured. DOM extraction lives only in the extension content script.
+
+## Popup Responsibilities
+
+- Show page, Bridge, and extraction status.
+- Request extraction through `chrome.tabs.sendMessage`.
+- Safely handle message failures.
+- Show extraction summary.
+- Send extracted payload to Bridge.
+- Show success and error states.
+- Support runtime i18n.
 
 ## Why a Local Bridge Is Needed
 

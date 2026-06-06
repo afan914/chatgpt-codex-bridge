@@ -12,14 +12,14 @@ ChatGPT Context Bridge for Codex 是一个本地优先的工具，用来把 Chat
 
 Milestone 1：Bridge core 已实现。
 Milestone 2：带 mock payload 和 i18n 的扩展弹窗已实现。
-Milestone 3：真实 ChatGPT DOM 提取尚未实现。
-Milestone 4：真实资源提取尚未实现。
+Milestone 3：真实 ChatGPT 对话提取已实现。
+Milestone 4：完整资源下载尚未实现。
 
 ## 架构概览
 
 项目分为三层职责：
 
-- 浏览器扩展：展示 popup，检查 Bridge 健康状态，通过 URL 检测 ChatGPT 页面，支持 EN / 中文切换，并向本地 Bridge 发送 mock payload。
+- 浏览器扩展：展示 popup，检查 Bridge 健康状态，通过 URL 检测 ChatGPT 页面，支持 EN / 中文切换，提取当前 ChatGPT 对话，并发送给本地 Bridge。
 - 本地 Bridge CLI：运行在 `127.0.0.1:17321`，校验 payload，并把上下文文件写入配置好的 Codex 项目目录。
 - Shared package：维护共享 TypeScript 类型、payload 校验、slug 生成、文件名清洗、URL 工具和弹窗 i18n 工具。
 
@@ -134,19 +134,28 @@ pnpm build:extension
 ## 使用弹窗
 
 1. 用 `pnpm dev:bridge` 启动 Bridge。
-2. 在 Atlas / Chromium 中打开 ChatGPT。
+2. 在 Atlas / Chromium 中打开一个真实 ChatGPT 对话。
 3. 打开扩展弹窗。
 4. 确认 Bridge 已连接。
 5. 确认已检测到 ChatGPT 页面。
-6. 如有需要，切换 EN / 中文。
-7. 点击 Send to Codex。
-8. 检查 `<project-root>/.codex-context/chatgpt/`。
+6. 确认对话已读取。
+7. 如有需要，切换 EN / 中文。
+8. 点击 Send to Codex。
+9. 检查 `<project-root>/.codex-context/chatgpt/`。
+
+## 当前可用能力
+
+- Bridge 在本地 `127.0.0.1` 运行。
+- 扩展 popup 可以连接 Bridge。
+- popup 支持英文 / 中文切换。
+- 扩展会读取当前 ChatGPT 页面 DOM。
+- 扩展会提取对话消息、角色、代码块和链接。
+- 点击 Send to Codex 会把真实对话上下文写入 `.codex-context/chatgpt/`。
 
 ## 当前限制
 
-- Milestone 2 仍使用 mock payload，尚未提取真实 ChatGPT 对话 DOM。
-- 真实 ChatGPT DOM 提取会在 Milestone 3 实现。
-- 图片和文件提取在 MVP 中先记录为 unresolved asset references。
+- Milestone 3 会从当前 ChatGPT 页面提取真实对话文本、代码块和链接。
+- 当前版本尚未完整下载生成图片、文件、HTML artifacts 或 Markdown artifacts。这些计划在 Milestone 4 改进。
 - 重复导入同一对话时，会覆盖确定性的 conversation folder。
 
 ## 安全说明

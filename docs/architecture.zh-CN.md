@@ -9,11 +9,9 @@
 - 读取当前标签页 URL 和标题。
 - 通过 URL 检测 ChatGPT 页面。
 - 支持英文 / 简体中文运行时切换。
-- 在 Milestone 2 中向本地 Bridge 发送 mock payload。
+- 把提取出的对话 payload 发送给本地 Bridge。
 
 扩展不负责把文件写入 Codex 项目目录。
-
-Milestone 2 中，扩展还不会读取真实 ChatGPT DOM。弹窗只通过发送 mock payload 来验证“浏览器扩展 -> Bridge -> 项目目录”的集成链路。
 
 ## Bridge 职责
 
@@ -48,14 +46,39 @@ shared package 维护 extension 和 bridge 共同使用的代码：
 ## 数据流
 
 ```text
-ChatGPT 页面
+ChatGPT 对话 DOM
+-> Content script
+-> 提取 conversation payload
 -> 扩展弹窗
--> Mock payload builder
 -> Bridge client
 -> 本地 Bridge HTTP API
 -> Context writer
 -> Codex 项目 .codex-context/
 ```
+
+## Content Script 职责
+
+- 监听提取请求。
+- 读取当前页面 DOM。
+- 提取消息顺序。
+- 识别消息角色。
+- 提取可读文本。
+- 提取代码块。
+- 提取链接。
+- 在简单场景下检测 unresolved asset references。
+- 向 popup 返回类型化 payload。
+
+Bridge 不知道 ChatGPT DOM 结构。DOM 提取只存在于扩展 content script。
+
+## Popup 职责
+
+- 展示页面、Bridge 和提取状态。
+- 通过 `chrome.tabs.sendMessage` 请求提取。
+- 安全处理消息通信失败。
+- 展示提取摘要。
+- 把提取出的 payload 发送给 Bridge。
+- 展示成功和错误状态。
+- 支持运行时 i18n。
 
 ## 为什么需要本地 Bridge
 

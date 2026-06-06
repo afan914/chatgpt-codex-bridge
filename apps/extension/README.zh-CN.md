@@ -2,13 +2,21 @@
 
 ## 当前 Milestone
 
-Milestone 2 实现 Manifest V3 弹窗、Bridge 健康检查、mock Send to Codex 流程、基于 URL 的 ChatGPT 页面检测，以及英文 / 中文切换。
+Milestone 3 实现从当前页面提取真实 ChatGPT 对话。
 
 弹窗验证这条本地链路：
 
 ```text
-扩展弹窗 -> 本地 Bridge -> 配置好的 Codex 项目 .codex-context/
+ChatGPT DOM -> content script -> 扩展弹窗 -> 本地 Bridge -> 配置好的 Codex 项目 .codex-context/
 ```
+
+## 当前扩展能力
+
+- 检测 ChatGPT 页面。
+- 请求 content script 提取。
+- 提取消息、角色、文本、代码块和链接。
+- 把真实 payload 发送给本地 Bridge。
+- 支持英文 / 中文 UI。
 
 ## 构建
 
@@ -71,6 +79,16 @@ POST http://127.0.0.1:17321/import-chatgpt-context
 
 popup 还会通过 `chrome.tabs.sendMessage` ping ChatGPT content script。如果 content script 不可用，popup 会显示翻译后的刷新页面提示，并禁用 Send to Codex。
 
+## 验证 Content Script
+
+1. 确认 `dist/content.js` 存在。
+2. 确认 `dist/manifest.json` 引用了 `content.js`。
+3. 打开 ChatGPT DevTools，查找：
+
+```text
+ChatGPT Context Bridge content script loaded
+```
+
 ## i18n
 
 弹窗从 `@chatgpt-codex-bridge/shared` 导入 `t(locale, key)` 和 `Locale`。
@@ -83,4 +101,6 @@ chatgptCodexBridge.locale
 
 ## 当前限制
 
-本 milestone 只发送 mock payload。真实 ChatGPT DOM 提取尚未实现，会在 Milestone 3 中实现。
+- 暂不完整下载 assets。
+- 如果 ChatGPT 页面结构变化，DOM 提取可能需要更新。
+- 重新加载扩展后，请刷新 ChatGPT 页面。

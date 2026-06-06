@@ -18,7 +18,15 @@ pnpm typecheck
 pnpm lint
 ```
 
-Extension build and lint scripts are implemented in Milestone 2.
+Extension build, lint, popup, and real extraction scripts are implemented through Milestone 3.
+
+## Build and Run
+
+```bash
+pnpm install
+pnpm dev:bridge
+pnpm build:extension
+```
 
 ## Run Bridge in Dev Mode
 
@@ -76,19 +84,31 @@ pnpm dev:bridge
 2. Reopen the popup.
 3. Confirm Bridge disconnected.
 
-## Test Send to Codex with Mock Payload
+## Test Send to Codex with Real Extraction
 
 1. Start Bridge.
-2. Open a ChatGPT page.
+2. Open a real ChatGPT conversation.
 3. Open the popup.
-4. Click Send to Codex.
-5. Confirm files appear in:
+4. Confirm extraction status shows success.
+5. Confirm message count is greater than zero.
+6. Click Send to Codex.
+7. Confirm files appear in:
 
 ```text
 <project-root>/.codex-context/chatgpt/
 ```
 
-Milestone 2 sends a mock payload. Real ChatGPT DOM extraction starts in Milestone 3.
+Milestone 3 sends the real extracted ChatGPT conversation by default.
+
+## Debug Content Script
+
+1. Open the ChatGPT page.
+2. Open browser DevTools.
+3. Inspect console errors.
+4. Reload the ChatGPT page after reloading the extension.
+5. If content script is unavailable, refresh the ChatGPT tab.
+6. Verify `dist/content.js` exists.
+7. Verify `dist/manifest.json` references `content.js`.
 
 ## Test i18n
 
@@ -178,3 +198,14 @@ Milestone 1 does not include a full test suite. These functions are pure and rea
 - `validateImportPayload()` should reject empty `messages` with `EMPTY_MESSAGES`.
 - `buildFullConversationMarkdown()` should preserve message order, links, and code blocks.
 - `buildCodexTaskMarkdown()` should include source title, URL, and exported time.
+
+## Manual Extension Test Cases
+
+- ChatGPT page with plain text only.
+- ChatGPT page with code blocks.
+- ChatGPT page with links.
+- Non-ChatGPT page.
+- Bridge disconnected.
+- Empty or inaccessible page.
+- Language switch persistence.
+- Content script unavailable after extension reload.
