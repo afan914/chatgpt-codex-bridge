@@ -4,6 +4,7 @@ import { stat } from "node:fs/promises";
 import type { BridgeConfig, BridgeProject } from "@chatgpt-codex-bridge/shared";
 import { ensureDirectory, readJsonFile, writeJsonFile } from "../utils/fileSystem.js";
 import { defaultBridgeConfig, isValidProjectId, validateBridgeConfig } from "./configSchema.js";
+import { discoverBridgeProjects } from "./projectDiscovery.js";
 
 export function getConfigDirectory(): string {
   return path.join(os.homedir(), ".chatgpt-codex-bridge");
@@ -20,6 +21,15 @@ export async function loadBridgeConfig(): Promise<BridgeConfig> {
     await saveBridgeConfig(config);
   }
   return config;
+}
+
+export async function loadBridgeConfigWithDiscoveredProjects(): Promise<BridgeConfig> {
+  const config = await loadBridgeConfig();
+  const discoveredProjects = await discoverBridgeProjects(config.projects);
+  return {
+    ...config,
+    projects: [...config.projects, ...discoveredProjects]
+  };
 }
 
 export async function saveBridgeConfig(config: BridgeConfig): Promise<void> {
