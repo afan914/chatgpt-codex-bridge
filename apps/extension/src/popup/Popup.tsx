@@ -108,6 +108,10 @@ export function Popup(): JSX.Element {
       return;
     }
 
+    if (result.mode === "package" && result.packageDownloadUrl) {
+      triggerBrowserDownload(result.packageDownloadUrl);
+    }
+
     setSendResult(result);
   }
 
@@ -377,6 +381,16 @@ function getDisabledReason(input: DisabledReasonInput): DisabledReason | undefin
   }
 
   return undefined;
+}
+
+function triggerBrowserDownload(url: string): void {
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "";
+  link.rel = "noopener";
+  document.body.append(link);
+  link.click();
+  link.remove();
 }
 
 function buildManualPayload(input: {

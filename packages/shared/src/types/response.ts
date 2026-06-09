@@ -33,6 +33,7 @@ export interface ImportSuccessResponse {
   conversationSlug: string;
   outputDir?: string;
   packagePath?: string;
+  packageDownloadUrl?: string;
   filesWritten: string[];
 }
 

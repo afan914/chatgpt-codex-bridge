@@ -2,6 +2,7 @@ import http from "node:http";
 import type { BridgeConfig } from "@chatgpt-codex-bridge/shared";
 import { applyCorsHeaders, handleCorsPreflight } from "./middleware/cors.js";
 import { sendApiError } from "./middleware/errorHandler.js";
+import { handleDownloadExport } from "./routes/downloadExport.js";
 import { handleHealth } from "./routes/health.js";
 import { handleImportChatGPTContext } from "./routes/importChatGPTContext.js";
 import { handleProjects } from "./routes/projects.js";
@@ -23,6 +24,11 @@ export function createBridgeServer(config: BridgeConfig, version: string): http.
 
     if (request.method === "GET" && url.pathname === "/projects") {
       await handleProjects(response);
+      return;
+    }
+
+    if (request.method === "GET" && url.pathname.startsWith("/exports/")) {
+      await handleDownloadExport(url.pathname.replace(/^\/exports\//, ""), response);
       return;
     }
 

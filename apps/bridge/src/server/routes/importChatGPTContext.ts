@@ -3,6 +3,7 @@ import type { BridgeConfig, ImportSuccessResponse } from "@chatgpt-codex-bridge/
 import { validateImportPayload } from "@chatgpt-codex-bridge/shared";
 import { getProjectById, loadBridgeConfigWithDiscoveredProjects } from "../../config/configStore.js";
 import { exportAsPackage, importToCodexProject } from "../../writer/contextWriter.js";
+import { buildExportDownloadUrl } from "./downloadExport.js";
 import { errorToApiError, sendApiError, sendJson } from "../middleware/errorHandler.js";
 
 export async function handleImportChatGPTContext(
@@ -38,6 +39,7 @@ export async function handleImportChatGPTContext(
       conversationSlug: result.conversationSlug,
       outputDir: result.outputDir,
       packagePath: result.packagePath,
+      packageDownloadUrl: result.packagePath ? buildExportDownloadUrl(result.packagePath) : undefined,
       filesWritten: result.filesWritten
     };
     sendJson(response, 200, body);

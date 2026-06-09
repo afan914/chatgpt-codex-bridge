@@ -18,6 +18,7 @@ export type SendToBridgeResult =
       conversationSlug: string;
       outputDir?: string;
       packagePath?: string;
+      packageDownloadUrl?: string;
       filesWritten: string[];
     }
   | {
@@ -90,6 +91,7 @@ export async function sendPayloadToBridge(payload: ImportChatGPTContextPayload):
       conversationSlug: body.conversationSlug,
       outputDir: body.outputDir,
       packagePath: body.packagePath,
+      packageDownloadUrl: body.packageDownloadUrl ? `${BRIDGE_BASE_URL}${body.packageDownloadUrl}` : undefined,
       filesWritten: body.filesWritten
     };
   } catch {
