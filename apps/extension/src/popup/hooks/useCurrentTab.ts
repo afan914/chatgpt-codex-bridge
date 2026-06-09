@@ -46,7 +46,7 @@ export function useCurrentTab(): CurrentTabState {
 
         const chatGPTTab = findBestChatGPTTab(allTabs);
         if (chatGPTTab) {
-          setReadyState(setState, chatGPTTab);
+          focusTab(chatGPTTab, (focusedTab) => setReadyState(setState, focusedTab ?? chatGPTTab));
           return;
         }
 
@@ -89,5 +89,34 @@ function setReadyState(setState: (state: CurrentTabState) => void, tab: chrome.t
     url: tab.url,
     title: tab.title,
     isChatGPTPage: isChatGPTPage(tab.url)
+  });
+}
+
+function focusTab(tab: chrome.tabs.Tab, callback: (tab?: chrome.tabs.Tab) => void): void {
+  if (!tab.id) {
+    callback(tab);
+    return;
+  }
+
+  if (tab.windowId) {
+    chrome.windows.update(tab.windowId, { focused: true }, () => {
+      chrome.runtime.lastError;
+      activateTab(tab.id!, callback, tab);
+    });
+    return;
+  }
+
+  activateTab(tab.id, callback, tab);
+}
+
+function activateTab(tabId: number, callback: (tab?: chrome.tabs.Tab) => void, fallbackTab: chrome.tabs.Tab): void {
+  chrome.tabs.update(tabId, { active: true }, (updatedTab) => {
+    const updateError = chrome.runtime.lastError;
+    if (updateError) {
+      callback(fallbackTab);
+      return;
+    }
+
+    callback(updatedTab ?? fallbackTab);
   });
 }

@@ -6,6 +6,7 @@ export async function sendMessageToTab<TResponse>(
   | { ok: false; message: string; rawMessage?: string }
 > {
   if (isExtractConversationMessage(message)) {
+    await focusTab(tabId);
     const directExtraction = await executeDirectExtraction<TResponse>(tabId);
     if (directExtraction.ok) {
       return directExtraction;
@@ -451,6 +452,35 @@ function getTabUrl(tabId: number): Promise<string | undefined> {
         return;
       }
       resolve(tab.url);
+    });
+  });
+}
+
+function focusTab(tabId: number): Promise<void> {
+  return new Promise((resolve) => {
+    chrome.tabs.get(tabId, (tab) => {
+      const tabError = chrome.runtime.lastError;
+      if (tabError) {
+        resolve();
+        return;
+      }
+
+      const activate = () => {
+        chrome.tabs.update(tabId, { active: true }, () => {
+          chrome.runtime.lastError;
+          resolve();
+        });
+      };
+
+      if (tab.windowId) {
+        chrome.windows.update(tab.windowId, { focused: true }, () => {
+          chrome.runtime.lastError;
+          activate();
+        });
+        return;
+      }
+
+      activate();
     });
   });
 }
