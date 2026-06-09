@@ -6,9 +6,33 @@ export async function sendMessageToTab<TResponse>(
   | { ok: false; message: string; rawMessage?: string }
 > {
   if (isExtractConversationMessage(message)) {
-    return executeDirectExtraction<TResponse>(tabId);
+    const directExtraction = await executeDirectExtraction<TResponse>(tabId);
+    if (directExtraction.ok) {
+      return directExtraction;
+    }
+
+    const contentScriptExtraction = await sendMessageWithInjection<TResponse>(tabId, message);
+    if (contentScriptExtraction.ok) {
+      return contentScriptExtraction;
+    }
+
+    return {
+      ok: false,
+      message: `Direct extraction failed: ${directExtraction.message}. Content script fallback failed: ${contentScriptExtraction.message}`,
+      rawMessage: contentScriptExtraction.rawMessage ?? directExtraction.rawMessage
+    };
   }
 
+  return sendMessageWithInjection<TResponse>(tabId, message);
+}
+
+async function sendMessageWithInjection<TResponse>(
+  tabId: number,
+  message: unknown
+): Promise<
+  | { ok: true; response: TResponse }
+  | { ok: false; message: string; rawMessage?: string }
+> {
   const firstAttempt = await sendMessageOnce<TResponse>(tabId, message);
   if (firstAttempt.ok || !isReceivingEndMissing(firstAttempt.rawMessage ?? firstAttempt.message)) {
     return firstAttempt;
@@ -39,12 +63,13 @@ function executeDirectExtraction<TResponse>(
           target: { tabId },
           func: extractConversationInPage
         },
-        (results) => {
+        async (results) => {
           const lastError = chrome.runtime.lastError;
           if (lastError) {
+            const tabUrl = await getTabUrl(tabId);
             resolve({
               ok: false,
-              message: `Direct page read failed: ${lastError.message || "unknown error"}`,
+              message: `Direct page read failed on tab ${tabId}${tabUrl ? ` (${tabUrl})` : ""}: ${lastError.message || "unknown error"}`,
               rawMessage: lastError.message
             });
             return;
@@ -373,12 +398,13 @@ function injectContentScript(tabId: number): Promise<{ ok: true } | { ok: false;
           target: { tabId },
           func: () => window.location.href
         },
-        () => {
+        async () => {
           const probeError = chrome.runtime.lastError;
           if (probeError) {
+            const tabUrl = await getTabUrl(tabId);
             resolve({
               ok: false,
-              message: `Page injection probe failed: ${probeError.message || "unknown error"}`,
+              message: `Page injection probe failed on tab ${tabId}${tabUrl ? ` (${tabUrl})` : ""}: ${probeError.message || "unknown error"}`,
               rawMessage: probeError.message
             });
             return;
@@ -413,6 +439,19 @@ function injectContentScript(tabId: number): Promise<{ ok: true } | { ok: false;
         rawMessage: message
       });
     }
+  });
+}
+
+function getTabUrl(tabId: number): Promise<string | undefined> {
+  return new Promise((resolve) => {
+    chrome.tabs.get(tabId, (tab) => {
+      const tabError = chrome.runtime.lastError;
+      if (tabError) {
+        resolve(undefined);
+        return;
+      }
+      resolve(tab.url);
+    });
   });
 }
 
