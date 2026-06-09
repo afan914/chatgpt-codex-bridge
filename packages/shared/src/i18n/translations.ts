@@ -95,7 +95,12 @@ export const translations = {
     failedAssetCount: "Failed assets",
     assetWarning: "Some assets could not be saved. Details will be written to assets_manifest.json.",
     assetManifestHint: "Review assets_manifest.json for asset details.",
-    fullFlowReady: "Full local flow is ready."
+    fullFlowReady: "Full local flow is ready.",
+    manualFallbackTitle: "Manual fallback",
+    manualFallbackHint: "Atlas blocked automatic page reading. Copy the visible ChatGPT conversation and paste it here to continue.",
+    manualFallbackLabel: "Pasted conversation text",
+    manualFallbackPlaceholder: "Paste the ChatGPT conversation text here...",
+    manualFallbackReady: "Manual conversation ready"
   },
   zh: {
     extensionTitle: "ChatGPT 上下文桥接器",
@@ -193,6 +198,11 @@ export const translations = {
     failedAssetCount: "保存失败资产",
     assetWarning: "部分资产无法保存，详情会写入 assets_manifest.json。",
     assetManifestHint: "请查看 assets_manifest.json 了解资产详情。",
-    fullFlowReady: "完整本地流程已可用。"
+    fullFlowReady: "完整本地流程已可用。",
+    manualFallbackTitle: "手动兜底",
+    manualFallbackHint: "Atlas 阻止了自动读取页面。复制 ChatGPT 页面里可见的对话内容，粘贴到这里后仍可继续导入。",
+    manualFallbackLabel: "粘贴的对话文本",
+    manualFallbackPlaceholder: "把 ChatGPT 对话文本粘贴到这里...",
+    manualFallbackReady: "手动对话已就绪"
   }
 } as const;

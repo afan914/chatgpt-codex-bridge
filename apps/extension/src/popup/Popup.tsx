@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ImportChatGPTContextPayload } from "@chatgpt-codex-bridge/shared";
 import { t } from "@chatgpt-codex-bridge/shared";
 import type { SendToBridgeResult } from "../bridge/bridgeClient";
 import { sendPayloadToBridge } from "../bridge/bridgeClient";
@@ -20,6 +21,7 @@ export function Popup(): JSX.Element {
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [sendResult, setSendResult] = useState<SendToBridgeResult | undefined>();
   const [destination, setDestination] = useState<"codex_project" | "package">("codex_project");
+  const [manualText, setManualText] = useState("");
 
   const isCurrentTabChatGPT = currentTab.status === "ready" && currentTab.isChatGPTPage;
   const currentTabId = currentTab.status === "ready" ? currentTab.tabId : undefined;
@@ -28,10 +30,19 @@ export function Popup(): JSX.Element {
     isChatGPTPage: isCurrentTabChatGPT
   });
   const { projectsState, selectProject, refreshProjects } = useProjects(bridgeStatus.status === "connected");
+  const manualPayload = buildManualPayload({
+    text: manualText,
+    url: currentTab.status === "ready" ? currentTab.url : undefined,
+    title: currentTab.status === "ready" ? currentTab.title : undefined
+  });
+  const hasManualPayload = manualPayload !== undefined;
+  const activePayload = extractionStatus.status === "success" ? extractionStatus.payload : manualPayload;
 
   const extractionSummary =
     extractionStatus.status === "success"
       ? extractionStatus.summary
+      : manualPayload
+        ? summarizePayload(manualPayload)
       : {
           messageCount: 0,
           codeBlockCount: 0,
@@ -50,6 +61,7 @@ export function Popup(): JSX.Element {
     currentTabStatus: currentTab.status,
     isCurrentTabChatGPT,
     extractionStatus: extractionStatus.status,
+    hasManualPayload,
     extractedMessageCount: extractionSummary.messageCount,
     isSending,
     destination: effectiveDestination,
@@ -62,7 +74,7 @@ export function Popup(): JSX.Element {
     setErrorMessage(undefined);
     setSendResult(undefined);
 
-    if (currentTab.status !== "ready" || !currentTab.isChatGPTPage) {
+    if ((currentTab.status !== "ready" || !currentTab.isChatGPTPage) && !activePayload) {
       setErrorMessage(t(locale, "currentPageNotChatGPT"));
       return;
     }
@@ -72,16 +84,16 @@ export function Popup(): JSX.Element {
       return;
     }
 
-    if (extractionStatus.status !== "success") {
+    if (!activePayload) {
       setErrorMessage(`${t(locale, "readFailed")} ${t(locale, "refreshPageAndRetry")}`);
       return;
     }
 
     setIsSending(true);
     const result = await sendPayloadToBridge({
-      ...extractionStatus.payload,
+      ...activePayload,
       conversation: {
-        ...extractionStatus.payload.conversation,
+        ...activePayload.conversation,
         exportedAt: new Date().toISOString()
       },
       destination:
@@ -216,6 +228,23 @@ export function Popup(): JSX.Element {
             <span className="meta">{getExtractionErrorMessage(locale, extractionStatus.code, extractionStatus.message)}</span>
           </div>
         )}
+        {isCurrentTabChatGPT && extractionStatus.status === "error" && (
+          <div className="manual-fallback">
+            <div className="stack">
+              <h2>{t(locale, "manualFallbackTitle")}</h2>
+              <p className="meta">{t(locale, "manualFallbackHint")}</p>
+            </div>
+            <label className="field">
+              <span>{t(locale, "manualFallbackLabel")}</span>
+              <textarea
+                value={manualText}
+                onChange={(event) => setManualText(event.target.value)}
+                placeholder={t(locale, "manualFallbackPlaceholder")}
+              />
+            </label>
+            {hasManualPayload && <StatusBadge status="success">{t(locale, "manualFallbackReady")}</StatusBadge>}
+          </div>
+        )}
       </section>
 
       <section className="panel">
@@ -295,6 +324,7 @@ type DisabledReasonInput = {
   currentTabStatus: "loading" | "ready" | "error";
   isCurrentTabChatGPT: boolean;
   extractionStatus: "idle" | "extracting" | "success" | "error";
+  hasManualPayload: boolean;
   extractedMessageCount: number;
   isSending: boolean;
   destination: "codex_project" | "package";
@@ -326,15 +356,15 @@ function getDisabledReason(input: DisabledReasonInput): DisabledReason | undefin
     return "buttonDisabledBridgeDisconnected";
   }
 
-  if (!input.isCurrentTabChatGPT) {
+  if (!input.isCurrentTabChatGPT && !input.hasManualPayload) {
     return "buttonDisabledNotChatGPT";
   }
 
-  if (input.extractionStatus === "extracting" || input.extractionStatus === "idle") {
+  if (!input.hasManualPayload && (input.extractionStatus === "extracting" || input.extractionStatus === "idle")) {
     return "buttonDisabledExtracting";
   }
 
-  if (input.extractionStatus === "error") {
+  if (!input.hasManualPayload && input.extractionStatus === "error") {
     return "buttonDisabledExtractionFailed";
   }
 
@@ -347,6 +377,66 @@ function getDisabledReason(input: DisabledReasonInput): DisabledReason | undefin
   }
 
   return undefined;
+}
+
+function buildManualPayload(input: {
+  text: string;
+  url?: string;
+  title?: string;
+}): ImportChatGPTContextPayload | undefined {
+  const content = input.text.trim();
+  if (!content) {
+    return undefined;
+  }
+
+  return {
+    conversation: {
+      title: input.title?.trim() || "Manual ChatGPT Conversation",
+      url: input.url || "manual://chatgpt-conversation",
+      exportedAt: new Date().toISOString()
+    },
+    messages: [
+      {
+        index: 1,
+        role: "unknown",
+        content,
+        links: extractLinks(content),
+        codeBlocks: extractCodeBlocks(content)
+      }
+    ],
+    assets: []
+  };
+}
+
+function summarizePayload(payload: ImportChatGPTContextPayload) {
+  const codeBlockCount = payload.messages.reduce((count, message) => count + (message.codeBlocks?.length ?? 0), 0);
+  const linkCount = payload.messages.reduce((count, message) => count + (message.links?.length ?? 0), 0);
+  const assets = payload.assets ?? [];
+
+  return {
+    messageCount: payload.messages.length,
+    codeBlockCount,
+    linkCount,
+    assetCount: assets.length,
+    savedAssetCount: assets.filter((asset) => asset.status === "saved").length,
+    unresolvedAssetCount: assets.filter((asset) => asset.status === "unresolved").length,
+    failedAssetCount: assets.filter((asset) => asset.status === "failed").length
+  };
+}
+
+function extractCodeBlocks(text: string) {
+  return Array.from(text.matchAll(/```([^\n`]*)\n([\s\S]*?)```/g))
+    .map((match) => ({
+      language: match[1]?.trim() || "text",
+      content: match[2]?.trimEnd() || ""
+    }))
+    .filter((block) => block.content.trim().length > 0);
+}
+
+function extractLinks(text: string) {
+  return Array.from(text.matchAll(/https?:\/\/[^\s)]+/g)).map((match) => ({
+    url: match[0]
+  }));
 }
 
 function getExtractionErrorMessage(locale: Parameters<typeof t>[0], code: string | undefined, message: string): string {
