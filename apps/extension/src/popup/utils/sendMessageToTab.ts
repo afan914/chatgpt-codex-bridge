@@ -5,16 +5,13 @@ export async function sendMessageToTab<TResponse>(
   | { ok: true; response: TResponse }
   | { ok: false; message: string; rawMessage?: string }
 > {
+  if (isExtractConversationMessage(message)) {
+    return executeDirectExtraction<TResponse>(tabId);
+  }
+
   const firstAttempt = await sendMessageOnce<TResponse>(tabId, message);
   if (firstAttempt.ok || !isReceivingEndMissing(firstAttempt.rawMessage ?? firstAttempt.message)) {
     return firstAttempt;
-  }
-
-  if (isExtractConversationMessage(message)) {
-    const directExtraction = await executeDirectExtraction<TResponse>(tabId);
-    if (directExtraction.ok) {
-      return directExtraction;
-    }
   }
 
   const injection = await injectContentScript(tabId);
