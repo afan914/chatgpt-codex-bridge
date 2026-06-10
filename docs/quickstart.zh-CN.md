@@ -2,6 +2,8 @@
 
 ## 第 1 步：下载本项目
 
+请使用 Google Chrome 或可加载 Chrome 扩展的 Chromium 浏览器。ChatGPT Atlas 不能加载这个插件。
+
 打开：
 
 ```text
@@ -33,7 +35,7 @@ pnpm build:extension
 
 ## 第 4 步：加载扩展
 
-1. 打开 `chrome://extensions`。
+1. 在 Google Chrome 或 Chromium 浏览器里打开 `chrome://extensions`。
 2. 打开 Developer mode。
 3. 点击 Load unpacked。
 4. 选择 `apps/extension/dist`。

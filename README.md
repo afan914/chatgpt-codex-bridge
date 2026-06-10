@@ -6,6 +6,12 @@ ChatGPT Context Bridge for Codex moves the context of the ChatGPT conversation c
 
 It is local-first: the browser extension reads the active ChatGPT tab and can export a package directly through browser download. The local Bridge runs on `127.0.0.1` only when you want to import directly into a Codex project. The tool does not call private ChatGPT APIs and does not upload conversation content.
 
+## Browser Support
+
+This project currently supports Google Chrome or Chromium-based browsers that can load unpacked Manifest V3 extensions through `chrome://extensions`.
+
+ChatGPT Atlas does not support this browser extension workflow, so the plugin cannot be installed or used inside Atlas.
+
 ## Current Status
 
 Milestone 1: Bridge core is implemented.
@@ -48,7 +54,7 @@ Build the extension:
 pnpm build:extension
 ```
 
-Load `apps/extension/dist` as an unpacked extension in `chrome://extensions`.
+Load `apps/extension/dist` as an unpacked extension in Chrome at `chrome://extensions`. This does not work in ChatGPT Atlas.
 
 Then:
 
@@ -146,10 +152,12 @@ pnpm build:extension
 
 Then:
 
-1. Open `chrome://extensions`.
+1. Open `chrome://extensions` in Google Chrome or a Chromium-based browser.
 2. Enable Developer mode.
 3. Click Load unpacked.
 4. Select `apps/extension/dist`.
+
+ChatGPT Atlas cannot load this extension.
 
 ## Current Limitations
 

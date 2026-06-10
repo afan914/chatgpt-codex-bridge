@@ -1,5 +1,9 @@
 # 故障排查
 
+## 可以在 ChatGPT Atlas 里使用吗？
+
+不可以。本项目是 Chrome / Chromium Manifest V3 浏览器扩展，加上可选的本地 Bridge 服务。ChatGPT Atlas 不能加载这个扩展，请使用 Google Chrome 或 Chromium 浏览器。
+
 ## Bridge 未连接
 
 如果你只是想导出上下文包，可以不用启动 Bridge。选择“导出为上下文包”，浏览器会直接下载 zip。

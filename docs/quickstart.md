@@ -2,6 +2,8 @@
 
 ## Step 1: Download This Project
 
+Use Google Chrome or a Chromium-based browser for this quickstart. ChatGPT Atlas cannot load this extension.
+
 Open:
 
 ```text
@@ -33,7 +35,7 @@ pnpm build:extension
 
 ## Step 4: Load Extension
 
-1. Open `chrome://extensions`.
+1. Open `chrome://extensions` in Google Chrome or a Chromium-based browser.
 2. Enable Developer mode.
 3. Click Load unpacked.
 4. Select `apps/extension/dist`.

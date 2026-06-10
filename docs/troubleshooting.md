@@ -1,5 +1,9 @@
 # Troubleshooting
 
+## Can I use this in ChatGPT Atlas?
+
+No. This project is a Chrome / Chromium Manifest V3 browser extension plus an optional local Bridge service. ChatGPT Atlas cannot load this extension, so use Google Chrome or a Chromium-based browser.
+
 ## Local Service Disconnected
 
 If you only want to export a package, you can still use the extension without starting the Bridge. Choose `Export as package`; the browser will download the zip.

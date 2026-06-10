@@ -1,5 +1,7 @@
 # Browser Extension
 
+This extension currently supports Google Chrome or Chromium-based browsers that can load unpacked Manifest V3 extensions. ChatGPT Atlas cannot install or run this extension.
+
 The extension popup reads the current ChatGPT conversation tab, shows a local status summary, imports into Codex through the local Bridge, and exports zip packages directly from the browser.
 
 ## What It Does
@@ -27,7 +29,7 @@ apps/extension/dist/
 
 ## Load Unpacked
 
-Open `chrome://extensions`, enable Developer mode, click Load unpacked, and select:
+Open `chrome://extensions` in Google Chrome or a Chromium-based browser, enable Developer mode, click Load unpacked, and select:
 
 ```text
 apps/extension/dist

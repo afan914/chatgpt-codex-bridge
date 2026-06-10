@@ -1,5 +1,7 @@
 # 浏览器扩展
 
+当前只支持 Google Chrome 或可加载未打包 Manifest V3 扩展的 Chromium 浏览器。ChatGPT Atlas 不能安装或运行这个扩展。
+
 弹窗支持两条链路：
 
 ```text
@@ -33,7 +35,7 @@ apps/extension/dist/
 
 ## 加载未打包扩展
 
-打开 `chrome://extensions`，启用 Developer mode，点击 Load unpacked，选择：
+在 Google Chrome 或 Chromium 浏览器里打开 `chrome://extensions`，启用 Developer mode，点击 Load unpacked，选择：
 
 ```text
 apps/extension/dist
