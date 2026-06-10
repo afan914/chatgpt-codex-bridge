@@ -86,7 +86,7 @@ Browser-side export cannot write directly into arbitrary local project folders. 
 
 ## Asset Writer
 
-The asset writer only writes inside the export directory. It saves content-based assets such as HTML and Markdown blocks, decodes supported data URL images, and records unresolved assets in `assets_manifest.json`.
+The asset writer only writes inside the selected context output directory, such as a configured Codex project export folder or the browser-side zip package structure. It saves content-based assets such as HTML and Markdown blocks, decodes supported data URL images, and records unresolved assets in `assets_manifest.json`.
 
 ## Shared Package
 

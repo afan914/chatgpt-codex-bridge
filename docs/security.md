@@ -59,7 +59,7 @@ Logs should include service lifecycle and import/export summaries only. They mus
 ## Path Safety
 
 1. Asset filenames are sanitized.
-2. Asset files are only written inside the export directory.
+2. Asset files are only written inside the selected context output, such as a configured Codex project folder or the browser-generated zip package.
 3. Path traversal is blocked.
 
 ## Browser Extension Permissions

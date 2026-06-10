@@ -162,6 +162,8 @@ chatgpt-codex-bridge start
 
 ## No Codex Project Configured
 
+This only affects `Import to Codex project`. `Export as package` does not need a configured project.
+
 Fix:
 
 ```bash
@@ -170,6 +172,8 @@ chatgpt-codex-bridge project set-default <id>
 ```
 
 ## Project List Is Empty in Popup
+
+The project list is only needed for direct Codex import. Package export can still work without it.
 
 Possible causes:
 

@@ -4,7 +4,7 @@
 
 ChatGPT Context Bridge for Codex moves the context of the ChatGPT conversation currently open in your browser into a local Codex project or a portable zip package.
 
-It is local-first: the browser extension reads the active ChatGPT tab, the Bridge runs on `127.0.0.1`, and generated files are written on your computer. The tool does not call private ChatGPT APIs and does not upload conversation content.
+It is local-first: the browser extension reads the active ChatGPT tab and can export a package directly through browser download. The local Bridge runs on `127.0.0.1` only when you want to import directly into a Codex project. The tool does not call private ChatGPT APIs and does not upload conversation content.
 
 ## Current Status
 
@@ -16,9 +16,9 @@ Milestone 5: Production CLI, persistent local service commands, and user-level a
 
 ## What Works Now
 
-1. Bridge runs locally on `127.0.0.1:17321`.
-2. Bridge manages multiple Codex project paths.
-3. Extension popup connects to the local Bridge.
+1. The extension can export a zip context package from the browser even when the local Bridge is not running.
+2. Bridge runs locally on `127.0.0.1:17321` when direct Codex project import is needed.
+3. Bridge manages multiple Codex project paths.
 4. Extension supports English / Chinese switching.
 5. Extension reads the currently opened ChatGPT conversation.
 6. Extension extracts messages, code blocks, links, and asset references.
@@ -42,26 +42,6 @@ Install dependencies:
 pnpm install
 ```
 
-Build and link the CLI for local use:
-
-```bash
-pnpm build
-pnpm --filter ./apps/bridge link --global
-```
-
-Start the local Bridge once, or install the user-level auto-start service:
-
-```bash
-chatgpt-codex-bridge start
-chatgpt-codex-bridge install-service
-```
-
-Add a Codex project:
-
-```bash
-chatgpt-codex-bridge project add <id> <path>
-```
-
 Build the extension:
 
 ```bash
@@ -74,12 +54,22 @@ Then:
 
 1. Open the ChatGPT conversation you want to export.
 2. Click the extension.
-3. Confirm the local service is connected if you want direct Codex import. If it is disconnected, package export still works.
-4. Confirm the ChatGPT conversation is detected.
-5. Confirm conversation and asset summary are shown.
-6. Choose `Import to Codex project` or `Export as package`.
-7. Click the main action.
-8. Open the generated `.codex-context/chatgpt/` folder or downloaded package.
+3. Confirm the ChatGPT conversation is detected.
+4. Confirm conversation and asset summary are shown.
+5. Choose `Export as package`.
+6. Click `Export Package`.
+7. The browser downloads `chatgpt-context-package-<conversation-slug>.zip`.
+
+If you only need a zip context package, you do not need to start Bridge or add a Codex project.
+
+If you want to import directly into a Codex project, do this one-time local service setup:
+
+```bash
+pnpm build
+pnpm --filter ./apps/bridge link --global
+chatgpt-codex-bridge install-service
+chatgpt-codex-bridge project add <id> <path>
+```
 
 `Import to Codex project` requires the local Bridge because it writes to local project paths. `Export as package` always uses browser-side package generation and browser download, so it does not require Bridge.
 
@@ -104,11 +94,13 @@ Daily usage:
 First-time:
 chatgpt-codex-bridge install-service
 
-Daily:
+Daily Codex import:
 Open ChatGPT conversation
 → Open extension
-→ Import to Codex / Export package
+→ Import to Codex
 ```
+
+Package export does not need the local service. Open a ChatGPT conversation, open the extension, choose `Export as package`, and let the browser download the zip.
 
 CLI commands:
 
@@ -163,7 +155,8 @@ Duplicate imports overwrite the deterministic conversation folder for that proje
 ## Security Notes
 
 - The Bridge binds only to `127.0.0.1`.
-- The Bridge writes only inside explicitly configured project directories or the local export directory.
+- The Bridge writes only inside explicitly configured project directories.
+- Browser-side package export only creates a downloaded zip; it does not write into arbitrary project folders.
 - Path traversal is rejected.
 - No conversation content is uploaded by this tool.
 - Private ChatGPT APIs are intentionally not used.
