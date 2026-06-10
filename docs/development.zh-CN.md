@@ -20,6 +20,8 @@ pnpm lint
 
 Extension 的 build、popup、真实提取、资源提取、项目选择和上下文包导出已经可用于本地完整流程。
 
+`pnpm dev:bridge` 只用于开发 Bridge。普通用户导出上下文包不需要启动 Bridge；导出包由扩展 background service worker 在浏览器侧生成并下载。
+
 ## 以开发模式运行 Bridge
 
 初始化配置：
@@ -31,7 +33,7 @@ pnpm dev:bridge -- init
 配置项目目录：
 
 ```bash
-pnpm dev:bridge -- config set-project /path/to/your/codex/project
+chatgpt-codex-bridge project add my-project /path/to/your/codex/project
 ```
 
 启动 Bridge：
@@ -71,15 +73,28 @@ pnpm dev:bridge
 1. 停止 Bridge。
 2. 重新打开 popup。
 3. 确认显示 Bridge 未连接。
+4. 确认“导出为上下文包”仍可用。
+5. 确认“导入到 Codex 项目”不可用。
 
-## 使用真实提取测试 Send to Codex
+## 测试浏览器侧上下文包导出
+
+1. 停止 Bridge。
+2. 打开真实 ChatGPT 对话。
+3. 打开 popup。
+4. 选择“导出为上下文包”。
+5. 点击“导出包”。
+6. 确认浏览器下载 `chatgpt-context-package-<slug>.zip`。
+
+导出包应由 background service worker 处理，popup 不应直接生成 zip。
+
+## 使用真实提取测试导入到 Codex
 
 1. 启动 Bridge。
 2. 打开真实 ChatGPT 对话。
 3. 打开 popup。
 4. 确认提取状态成功。
 5. 确认消息数大于 0。
-6. 点击 Send to Codex。
+6. 点击“导入到 Codex”。
 7. 确认文件出现在：
 
 ```text

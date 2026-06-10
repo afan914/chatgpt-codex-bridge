@@ -14,19 +14,20 @@ Milestone 1：Bridge core 已实现。
 Milestone 2：带 mock payload 和 i18n 的扩展弹窗已实现。
 Milestone 3：真实 ChatGPT 对话提取已实现。
 Milestone 4：资源提取、Codex 项目选择、上下文包导出和完整本地可用流程已实现。
+Milestone 5：生产 CLI、持久本地服务和浏览器侧上下文包导出已实现。
 
 ## 当前可用能力
 
-1. Bridge 在本地 `127.0.0.1:17321` 运行。
-2. Bridge 可以管理多个 Codex 项目路径。
-3. 扩展 popup 可以连接本地 Bridge。
+1. 扩展可以在浏览器侧直接导出 zip 上下文包，不要求本地 Bridge 正在运行。
+2. 直接导入到 Codex 项目时，Bridge 在本地 `127.0.0.1:17321` 运行。
+3. Bridge 可以管理多个 Codex 项目路径。
 4. popup 支持英文 / 中文切换。
 5. 扩展读取当前打开的 ChatGPT 对话。
 6. 扩展提取消息、代码块、链接和资源引用。
-7. 扩展 / Bridge 会保存支持的资源，包括 snippets、HTML / Markdown 产物和支持的 data URL 图片。
+7. 扩展 / Bridge 会保存支持的资源，包括 snippets、HTML / Markdown 产物和支持的小型 data URL 图片。
 8. 未解析或保存失败的资源会记录在 `assets_manifest.json`。
-9. 你可以直接导入到选中的 Codex 项目。
-10. 你也可以导出 zip 上下文包，给其他工具或手动使用。
+9. Bridge 运行并配置项目后，你可以直接导入到选中的 Codex 项目。
+10. 即使 Bridge 没有运行，你也可以导出 zip 上下文包，给其他工具或手动使用。
 
 ## 快速开始
 
@@ -43,18 +44,6 @@ cd chatgpt-codex-bridge
 pnpm install
 ```
 
-启动本地 Bridge：
-
-```bash
-pnpm dev:bridge
-```
-
-另开一个终端，添加 Codex 项目：
-
-```bash
-chatgpt-codex-bridge project add <id> <path>
-```
-
 构建扩展：
 
 ```bash
@@ -67,14 +56,38 @@ pnpm build:extension
 
 1. 打开你想导出的 ChatGPT 对话。
 2. 点击扩展图标。
-3. 确认本地服务已连接。
-4. 确认已检测到 ChatGPT 对话。
-5. 确认对话和资源摘要已显示。
-6. 选择“导入到 Codex 项目”或“导出为上下文包”。
-7. 点击主按钮。
-8. 打开生成的 `.codex-context/chatgpt/` 目录或 zip 包。
+3. 确认已检测到 ChatGPT 对话。
+4. 确认对话和资源摘要已显示。
+5. 选择“导出为上下文包”。
+6. 点击“导出包”。
+7. 浏览器会下载 `chatgpt-context-package-<conversation-slug>.zip`。
+
+如果你只需要 zip 上下文包，不需要手动启动 Bridge，也不需要手动添加 Codex 项目。
+
+如果你想直接导入到 Codex 项目，再进行一次性本地服务设置：
+
+```bash
+pnpm build
+pnpm --filter ./apps/bridge link --global
+chatgpt-codex-bridge install-service
+chatgpt-codex-bridge project add <id> <path>
+```
+
+`install-service` 会安装用户级自动启动服务；日常使用不需要手动运行 `pnpm dev:bridge`。
 
 ## Bridge 命令
+
+Bridge 只在“导入到 Codex 项目”时需要。普通“导出为上下文包”走浏览器侧生成和下载，不依赖 Bridge。
+
+```bash
+chatgpt-codex-bridge start
+chatgpt-codex-bridge status
+chatgpt-codex-bridge stop
+chatgpt-codex-bridge install-service
+chatgpt-codex-bridge uninstall-service
+```
+
+项目注册命令：
 
 ```bash
 chatgpt-codex-bridge project list
@@ -98,7 +111,8 @@ chatgpt-codex-bridge config set-project /path/to/project
 ## 安全说明
 
 - Bridge 只绑定到 `127.0.0.1`。
-- Bridge 只写入显式配置的项目目录或本地导出目录。
+- Bridge 只写入显式配置的项目目录。
+- 浏览器侧导出只会生成 zip 下载，不会写入任意本地项目目录。
 - 路径穿越会被拒绝。
 - 本工具不会上传对话内容。
 - 项目刻意不使用 ChatGPT 私有 API。

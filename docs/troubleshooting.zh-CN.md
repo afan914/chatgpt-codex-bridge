@@ -2,16 +2,24 @@
 
 ## Bridge 未连接
 
-如果扩展 popup 显示 Bridge 未连接，常见原因是：
+如果你只是想导出上下文包，可以不用启动 Bridge。选择“导出为上下文包”，浏览器会直接下载 zip。
+
+如果你想导入到 Codex 项目，Bridge 必须运行。常见未连接原因是：
 
 1. Bridge 没有运行。
 2. 运行 Bridge 的终端窗口被关闭。
 3. 端口 `17321` 被阻塞或占用。
 
-启动 Bridge：
+启动一次 Bridge：
 
 ```bash
-pnpm dev:bridge
+chatgpt-codex-bridge start
+```
+
+或安装自动启动服务：
+
+```bash
+chatgpt-codex-bridge install-service
 ```
 
 然后测试：
@@ -21,6 +29,24 @@ curl http://127.0.0.1:17321/health
 ```
 
 然后重新打开 popup。
+
+## 本地服务没运行，但我只想导出包
+
+可以继续使用扩展导出当前对话。
+
+选择：
+
+```text
+导出为上下文包
+```
+
+浏览器会下载 `chatgpt-context-package-<conversation-slug>.zip`。
+
+如果要直接导入 Codex 项目，再启动本地服务：
+
+```bash
+chatgpt-codex-bridge start
+```
 
 ## 端口 `17321` 已被占用
 
@@ -34,15 +60,15 @@ Milestone 1 不会自动选择其他端口，因为扩展默认期望访问 `173
 
 ## 项目路径未配置
 
-运行：
+如果要导入 Codex 项目，先添加项目：
 
 ```bash
-pnpm dev:bridge -- config set-project /path/to/your/codex/project
+chatgpt-codex-bridge project add <id> /path/to/your/codex/project
 ```
 
 ## 当前页面不是 ChatGPT
 
-只有在 ChatGPT 页面且提取成功后才能使用 Send to Codex。请打开：
+只有在 ChatGPT 页面且提取成功后才能导入到 Codex。请打开：
 
 ```text
 https://chatgpt.com
@@ -50,11 +76,11 @@ https://chatgpt.com
 
 然后重新打开 popup。
 
-## Send to Codex 按钮不可点击
+## 导入到 Codex 按钮不可点击
 
 可能原因：
 
-1. Bridge 未连接。
+1. 选择的是“导入到 Codex 项目”，但 Bridge 未连接。
 2. Bridge 状态仍在检查。
 3. 当前页面不是 ChatGPT。
 4. 对话提取仍在进行或失败。
@@ -62,6 +88,32 @@ https://chatgpt.com
 6. 发送请求正在进行中。
 
 请查看 popup 中的状态提示。
+
+如果选择“导出为上下文包”，Bridge 未连接不应该阻止导出；请确认对话已读取成功。
+
+## 浏览器没有下载上下文包
+
+可能原因：
+
+1. 浏览器阻止了下载。
+2. 扩展缺少 `downloads` 权限。
+3. zip 生成失败。
+4. 对话未读取成功。
+5. background service worker 没有响应。
+
+修复方式：
+
+1. 检查浏览器下载记录。
+2. 重新加载扩展。
+3. 刷新 ChatGPT 页面。
+4. 重试导出。
+5. 查看扩展 service worker 日志。
+
+## 导出的包很大
+
+部分对话可能包含大型 data URL 或生成资源。
+
+扩展会跳过超过限制的大型 data URL 图片，并在 `assets_manifest.json` 中记录为 unresolved。
 
 ## 语言没有保留
 

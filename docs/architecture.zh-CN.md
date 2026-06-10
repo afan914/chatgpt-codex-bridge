@@ -9,9 +9,10 @@
 - 读取当前标签页 URL 和标题。
 - 通过 URL 检测 ChatGPT 页面。
 - 支持英文 / 简体中文运行时切换。
-- 把提取出的对话 payload 发送给本地 Bridge。
+- 导出上下文包时，把提取出的 payload 发给 background service worker，由浏览器侧生成 zip 并下载。
+- 导入 Codex 项目时，把提取出的对话 payload 发送给本地 Bridge。
 
-扩展不负责把文件写入 Codex 项目目录。
+扩展不负责把文件写入 Codex 项目目录；写入项目目录仍由 Bridge 完成。
 
 ## Bridge 职责
 
@@ -26,6 +27,8 @@ Bridge 是一个本地 Node.js CLI 和 HTTP server。它负责：
 - 把上下文导出到 `.codex-context/chatgpt/` 下的确定性目录。
 - 执行路径安全检查。
 - 返回结构化成功 / 错误响应。
+
+Bridge 只在“导入到 Codex 项目”时需要。普通“导出为上下文包”不需要 Bridge。
 
 Bridge 不关心 ChatGPT DOM selector，也不调用 ChatGPT API。
 
@@ -42,6 +45,7 @@ shared package 维护 extension 和 bridge 共同使用的代码：
 - i18n 类型。
 - 翻译表。
 - 轻量 i18n 翻译表和 `t(locale, key)`。
+- Markdown / manifest 等纯上下文包生成逻辑。
 
 ## 数据流
 
@@ -50,6 +54,22 @@ ChatGPT 对话 DOM
 -> Content script
 -> 提取 conversation payload
 -> 扩展弹窗
+```
+
+导出上下文包：
+
+```text
+扩展弹窗
+-> Background service worker
+-> 浏览器侧 JSZip package builder
+-> chrome.downloads.download
+-> 浏览器下载 zip
+```
+
+导入 Codex 项目：
+
+```text
+扩展弹窗
 -> Bridge client
 -> 本地 Bridge HTTP API
 -> Context writer
@@ -76,13 +96,18 @@ Bridge 不知道 ChatGPT DOM 结构。DOM 提取只存在于扩展 content scrip
 - 通过 `chrome.tabs.sendMessage` 请求提取。
 - 安全处理消息通信失败。
 - 展示提取摘要。
-- 把提取出的 payload 发送给 Bridge。
+- 导出包时把 payload 发送给 background service worker。
+- 导入 Codex 时把 payload 发送给 Bridge。
 - 展示成功和错误状态。
 - 支持运行时 i18n。
 
 ## 为什么需要本地 Bridge
 
-浏览器扩展适合读取当前页面，但本地项目文件写入应由用户明确启动和配置的本地进程来完成。Bridge 为扩展提供一个很小的本地 API，用来完成文件写入步骤。
+浏览器扩展适合读取当前页面，也可以在浏览器侧生成 zip 下载。但本地项目文件写入应由用户明确启动和配置的本地进程来完成。Bridge 为扩展提供一个很小的本地 API，用来完成 Codex 项目写入步骤。
+
+## 为什么导出包不需要 Bridge
+
+导出上下文包只需要生成 zip 并交给浏览器下载，不需要写入任意本地项目目录。因此它由扩展 background service worker 使用本地打包的 JSZip 完成，不加载 CDN，不上传对话内容。
 
 ## 为什么只监听 `127.0.0.1`
 
