@@ -8,11 +8,28 @@ Current ChatGPT conversation tab
 -> Extract messages, code, links, asset references
 -> Popup
 -> Destination selection
+-> Import path OR package export path
+```
+
+Codex project import:
+
+```text
+Popup
 -> Bridge client
 -> Local Bridge HTTP API
 -> Context writer
 -> Asset writer
--> Codex project .codex-context/ OR exported zip package
+-> Codex project .codex-context/
+```
+
+Package export:
+
+```text
+Popup
+-> Background service worker
+-> Browser-side JSZip package builder
+-> chrome.downloads.download
+-> Browser download
 ```
 
 ## Content Script
@@ -37,9 +54,9 @@ The popup:
 2. Shows local service status.
 3. Shows conversation read status.
 4. Shows extraction summary.
-5. Loads the Bridge project list.
+5. Loads the Bridge project list only when the Bridge is connected.
 6. Lets the user select destination.
-7. Sends payload with destination.
+7. Sends Codex imports to the Bridge or package export requests to the background service worker.
 8. Shows success / error state.
 9. Supports i18n.
 
@@ -57,8 +74,15 @@ The Bridge is a local Node.js CLI and HTTP server. It:
 8. Writes supported assets.
 9. Generates asset manifests.
 10. Records unresolved and failed assets.
-11. Creates zip packages when requested.
-12. Enforces local-only path safety.
+11. Enforces local-only path safety.
+
+The Bridge is required for `Import to Codex project`. It is not required for the normal `Export as package` button.
+
+## Browser-side Package Export
+
+Package export always runs in the extension background service worker. JSZip is bundled from npm and no CDN or remote script is loaded. The background worker creates the zip and calls `chrome.downloads.download`; the popup only triggers the request and shows status.
+
+Browser-side export cannot write directly into arbitrary local project folders. Use the Bridge for direct Codex project import.
 
 ## Asset Writer
 
@@ -71,6 +95,7 @@ The shared package owns:
 - Payload, destination, asset, config, and response types.
 - Payload validation.
 - Central asset failure reasons.
+- Pure package generation functions for Markdown and manifests.
 - Slug and filename helpers.
 - URL helpers.
 - i18n translations and `t(locale, key)`.

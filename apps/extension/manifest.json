@@ -1,13 +1,14 @@
 {
   "manifest_version": 3,
   "name": "ChatGPT Context Bridge for Codex",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Send ChatGPT conversation context to a local Codex project through a local Bridge.",
   "permissions": [
     "activeTab",
     "scripting",
     "storage",
-    "tabs"
+    "tabs",
+    "downloads"
   ],
   "host_permissions": [
     "https://chatgpt.com/*",

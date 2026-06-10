@@ -4,19 +4,43 @@
 
 The Bridge listens only on `127.0.0.1`. It must never listen on `0.0.0.0` because it can write files into configured project directories.
 
+Auto-start does not introduce a remote server. The Bridge still binds only to the loopback interface.
+
 ## Project Registry Security
 
 1. Bridge only writes to explicitly configured project paths.
-2. Bridge does not scan the filesystem.
+2. Service installation does not scan local Codex projects.
 3. Project paths are configured by the user.
 4. The extension only receives the configured project list from the local Bridge.
 
+## Service Mode Security
+
+1. Auto-start services run as the current user.
+2. No admin-level system service is required for the supported service paths.
+3. Config, PID, logs, and exports are stored under `~/.chatgpt-codex-bridge/`.
+4. The PID file is used only for Bridge process management.
+5. Platform support varies: macOS LaunchAgent support is implemented, Windows Task Scheduler support is implemented but not locally verified here, and Linux systemd user support requires `systemctl --user`.
+
+## Logs
+
+Logs are written to:
+
+```text
+~/.chatgpt-codex-bridge/logs/
+```
+
+Logs should include service lifecycle and import/export summaries only. They must not include full conversation content, asset content, or secrets.
+
 ## Package Export Security
 
-1. Packages are written locally under the Bridge export directory.
-2. Implementation uses `os.homedir()` and `path.join()` to resolve the export directory.
+1. Browser-side package export is generated locally inside the extension.
+2. Browser-side package export does not upload data.
 3. Packages may contain private conversation content.
 4. Users should review packages before sharing.
+5. Browser-side export cannot write directly into arbitrary project folders.
+6. Codex project import still requires the local Bridge because it writes to local project paths.
+7. JSZip is bundled as an npm dependency and is not loaded from a CDN.
+8. Large data URL images may be skipped to reduce memory and file size risk.
 
 ## Asset Security
 
@@ -42,6 +66,7 @@ The Bridge listens only on `127.0.0.1`. It must never listen on `0.0.0.0` becaus
 
 - `activeTab` and `tabs` read the current tab title and URL so the popup can detect ChatGPT pages.
 - `storage` persists language and selected project ID.
+- `downloads` is used only to save the generated context package zip.
 - Host permissions are limited to ChatGPT domains and the local Bridge address.
 
 The extension does not request `<all_urls>`.

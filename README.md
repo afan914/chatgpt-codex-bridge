@@ -12,6 +12,7 @@ Milestone 1: Bridge core is implemented.
 Milestone 2: Extension popup with mock payload and i18n is implemented.
 Milestone 3: Real ChatGPT conversation extraction is implemented.
 Milestone 4: Asset extraction, Codex project selection, package export, and full local usable flow are implemented.
+Milestone 5: Production CLI, persistent local service commands, and user-level auto-start support are implemented.
 
 ## What Works Now
 
@@ -21,10 +22,10 @@ Milestone 4: Asset extraction, Codex project selection, package export, and full
 4. Extension supports English / Chinese switching.
 5. Extension reads the currently opened ChatGPT conversation.
 6. Extension extracts messages, code blocks, links, and asset references.
-7. Extension / Bridge saves supported assets, including snippets, HTML / Markdown artifacts, and supported data URL images.
+7. Extension / Bridge saves supported assets, including snippets, HTML / Markdown artifacts, and supported small data URL images.
 8. Unresolved or failed assets are recorded in `assets_manifest.json`.
-9. You can import directly into a selected Codex project.
-10. You can export a zip package for other tools or manual use.
+9. You can import directly into a selected Codex project when the local Bridge is running.
+10. You can export a zip package from the browser even when the local Bridge is not running.
 
 ## Full Local Flow
 
@@ -41,13 +42,21 @@ Install dependencies:
 pnpm install
 ```
 
-Start the local Bridge:
+Build and link the CLI for local use:
 
 ```bash
-pnpm dev:bridge
+pnpm build
+pnpm --filter ./apps/bridge link --global
 ```
 
-In another Terminal, add a Codex project:
+Start the local Bridge once, or install the user-level auto-start service:
+
+```bash
+chatgpt-codex-bridge start
+chatgpt-codex-bridge install-service
+```
+
+Add a Codex project:
 
 ```bash
 chatgpt-codex-bridge project add <id> <path>
@@ -65,16 +74,53 @@ Then:
 
 1. Open the ChatGPT conversation you want to export.
 2. Click the extension.
-3. Confirm the local service is connected.
+3. Confirm the local service is connected if you want direct Codex import. If it is disconnected, package export still works.
 4. Confirm the ChatGPT conversation is detected.
 5. Confirm conversation and asset summary are shown.
 6. Choose `Import to Codex project` or `Export as package`.
 7. Click the main action.
-8. Open the generated `.codex-context/chatgpt/` folder or exported package.
+8. Open the generated `.codex-context/chatgpt/` folder or downloaded package.
 
-## Running the Bridge
+`Import to Codex project` requires the local Bridge because it writes to local project paths. `Export as package` always uses browser-side package generation and browser download, so it does not require Bridge.
 
-During local development:
+## Running the Bridge as a Local Service
+
+The CLI is production-ready for local use. npm publishing may be added later. For local development linking:
+
+```bash
+pnpm build
+pnpm --filter ./apps/bridge link --global
+```
+
+Future npm global installation is expected to use:
+
+```bash
+npm install -g chatgpt-codex-bridge
+```
+
+Daily usage:
+
+```text
+First-time:
+chatgpt-codex-bridge install-service
+
+Daily:
+Open ChatGPT conversation
+→ Open extension
+→ Import to Codex / Export package
+```
+
+CLI commands:
+
+```bash
+chatgpt-codex-bridge start
+chatgpt-codex-bridge status
+chatgpt-codex-bridge stop
+chatgpt-codex-bridge install-service
+chatgpt-codex-bridge uninstall-service
+```
+
+During local development only:
 
 ```bash
 pnpm dev:bridge

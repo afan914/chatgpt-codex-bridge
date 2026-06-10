@@ -1,6 +1,6 @@
 {
-  "name": "bridge",
-  "version": "0.1.0",
+  "name": "chatgpt-codex-bridge",
+  "version": "0.2.0",
   "type": "module",
   "bin": {
     "chatgpt-codex-bridge": "./dist/cli/cli.js"
@@ -9,7 +9,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "dev": "node --import tsx --conditions development src/cli/cli.ts",
-    "build": "tsc -p ../../packages/shared/tsconfig.json && tsc -p tsconfig.json",
+    "build": "tsc -p ../../packages/shared/tsconfig.json && tsc -p tsconfig.json && chmod +x dist/cli/cli.js",
     "typecheck": "tsc -p ../../packages/shared/tsconfig.json && tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p ../../packages/shared/tsconfig.json && tsc -p tsconfig.json --noEmit"
   },

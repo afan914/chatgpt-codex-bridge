@@ -1,8 +1,9 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { BridgeConfig, ImportSuccessResponse } from "@chatgpt-codex-bridge/shared";
 import { validateImportPayload } from "@chatgpt-codex-bridge/shared";
-import { getProjectById, loadBridgeConfigWithDiscoveredProjects } from "../../config/configStore.js";
+import { getProjectById, loadBridgeConfig } from "../../config/configStore.js";
 import { exportAsPackage, importToCodexProject } from "../../writer/contextWriter.js";
+import { appendServiceLog } from "../../runtime/fileLogger.js";
 import { buildExportDownloadUrl } from "./downloadExport.js";
 import { errorToApiError, sendApiError, sendJson } from "../middleware/errorHandler.js";
 
@@ -24,7 +25,7 @@ export async function handleImportChatGPTContext(
   }
 
   try {
-    const currentConfig = await loadBridgeConfigWithDiscoveredProjects().catch(() => config);
+    const currentConfig = await loadBridgeConfig().catch(() => config);
     const destination = validation.value.destination ?? { type: "codex_project" as const };
     const result =
       destination.type === "package"
@@ -42,9 +43,11 @@ export async function handleImportChatGPTContext(
       packageDownloadUrl: result.packagePath ? buildExportDownloadUrl(result.packagePath) : undefined,
       filesWritten: result.filesWritten
     };
+    await appendServiceLog(`Import/export success mode=${result.mode} slug=${result.conversationSlug} files=${result.filesWritten.length}`);
     sendJson(response, 200, body);
   } catch (error) {
     const apiError = errorToApiError(error);
+    await appendServiceLog(`Import/export failed code=${apiError.code} message=${apiError.message}`, "stderr");
     sendApiError(response, apiError.statusCode, apiError.code, apiError.message);
   }
 }

@@ -13,13 +13,22 @@ import { useCurrentTab } from "./hooks/useCurrentTab";
 import { useLocale } from "./hooks/useLocale";
 import { useProjects } from "./hooks/useProjects";
 
+type BrowserPackageExportResult = {
+  ok: true;
+  mode: "package";
+  exportedBy: "extension";
+  filename: string;
+};
+
+type PopupSendResult = SendToBridgeResult | BrowserPackageExportResult;
+
 export function Popup(): JSX.Element {
   const { locale, setLocale } = useLocale();
   const currentTab = useCurrentTab();
   const { bridgeStatus, refresh } = useBridgeStatus();
   const [isSending, setIsSending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
-  const [sendResult, setSendResult] = useState<SendToBridgeResult | undefined>();
+  const [sendResult, setSendResult] = useState<PopupSendResult | undefined>();
   const [destination, setDestination] = useState<"codex_project" | "package">("codex_project");
   const [manualText, setManualText] = useState("");
 
@@ -54,7 +63,9 @@ export function Popup(): JSX.Element {
         };
 
   const effectiveDestination =
-    destination === "codex_project" && projectsState.status === "ready" && projectsState.projects.length === 0 ? "package" : destination;
+    bridgeStatus.status === "disconnected" || (destination === "codex_project" && projectsState.status === "ready" && projectsState.projects.length === 0)
+      ? "package"
+      : destination;
 
   const disabledReason = getDisabledReason({
     bridgeStatus: bridgeStatus.status,
@@ -80,8 +91,10 @@ export function Popup(): JSX.Element {
     }
 
     if (bridgeStatus.status !== "connected") {
-      setErrorMessage(t(locale, "bridgeDisconnectedHint"));
-      return;
+      if (effectiveDestination === "codex_project") {
+        setErrorMessage(t(locale, "localServiceRequiredForCodexImport"));
+        return;
+      }
     }
 
     if (!activePayload) {
@@ -89,8 +102,7 @@ export function Popup(): JSX.Element {
       return;
     }
 
-    setIsSending(true);
-    const result = await sendPayloadToBridge({
+    const payloadToSend: ImportChatGPTContextPayload = {
       ...activePayload,
       conversation: {
         ...activePayload.conversation,
@@ -98,18 +110,20 @@ export function Popup(): JSX.Element {
       },
       destination:
         effectiveDestination === "package"
-          ? { type: "package" }
+          ? { type: "package", exportedBy: "extension" }
           : { type: "codex_project", projectId: projectsState.selectedProjectId }
-    });
+    };
+
+    setIsSending(true);
+    const result =
+      effectiveDestination === "package"
+        ? await exportPackageInBrowser(payloadToSend, t(locale, "packageExportFailed"))
+        : await sendPayloadToBridge(payloadToSend);
     setIsSending(false);
 
     if (!result.ok) {
       setErrorMessage(result.message);
       return;
-    }
-
-    if (result.mode === "package" && result.packageDownloadUrl) {
-      triggerBrowserDownload(result.packageDownloadUrl);
     }
 
     setSendResult(result);
@@ -165,7 +179,14 @@ export function Popup(): JSX.Element {
         {bridgeStatus.status === "disconnected" && (
           <div className="stack">
             <StatusBadge status="error">{t(locale, "bridgeDisconnected")}</StatusBadge>
-            <span className="meta">{bridgeStatus.message ?? t(locale, "startLocalServiceHint")}</span>
+            <span className="meta">{t(locale, "localServiceNotRunning")}</span>
+            <span className="meta">{t(locale, "canStillExportPackage")}</span>
+            <span className="meta">{t(locale, "startLocalServiceToImportCodex")}</span>
+            <span className="meta">{t(locale, "startLocalServiceOnce")}</span>
+            <code>{t(locale, "manualStartCommand")}</code>
+            <span className="meta">{t(locale, "enableAutoStart")}</span>
+            <code>{t(locale, "autoStartCommand")}</code>
+            {bridgeStatus.message && <span className="meta">{bridgeStatus.message}</span>}
           </div>
         )}
       </section>
@@ -264,7 +285,7 @@ export function Popup(): JSX.Element {
           <button
             className={effectiveDestination === "codex_project" ? "segmented__button segmented__button--active" : "segmented__button"}
             type="button"
-            disabled={projectsState.projects.length === 0}
+            disabled={bridgeStatus.status !== "connected" || projectsState.projects.length === 0}
             onClick={() => setDestination("codex_project")}
           >
             {t(locale, "importToCodexProject")}
@@ -277,6 +298,8 @@ export function Popup(): JSX.Element {
             {t(locale, "exportAsPackage")}
           </button>
         </div>
+        {bridgeStatus.status !== "connected" && <p className="meta">{t(locale, "localServiceRequiredForCodexImport")}</p>}
+        {bridgeStatus.status !== "connected" && <p className="meta">{t(locale, "exportPackageWithoutLocalService")}</p>}
         {projectsState.status === "error" && <p className="meta">{t(locale, "loadProjectsFailed")}: {projectsState.message}</p>}
         {projectsState.status === "ready" && projectsState.projects.length === 0 && (
           <p className="meta">{t(locale, "noProjectConfigured")} {t(locale, "projectSetupHint")}</p>
@@ -304,10 +327,13 @@ export function Popup(): JSX.Element {
       {sendResult?.ok && (
         <div className="message message--success">
           <strong>{sendResult.mode === "package" ? t(locale, "packageExported") : t(locale, "codexImportSuccess")}</strong>
-          <span>{t(locale, "conversationSlug")}: {sendResult.conversationSlug}</span>
-          {sendResult.outputDir && <span>{t(locale, "outputDirectoryLabel")}: {sendResult.outputDir}</span>}
-          {sendResult.packagePath && <span>{t(locale, "packagePath")}: {sendResult.packagePath}</span>}
-          <span>{t(locale, "filesWrittenLabel")}: {sendResult.filesWritten.length}</span>
+          {"exportedBy" in sendResult && <span>{t(locale, "downloadStarted")}</span>}
+          {"exportedBy" in sendResult && <span>{t(locale, "browserPackageExported")}</span>}
+          {"filename" in sendResult && <span>{t(locale, "packagePath")}: {sendResult.filename}</span>}
+          {"conversationSlug" in sendResult && <span>{t(locale, "conversationSlug")}: {sendResult.conversationSlug}</span>}
+          {"outputDir" in sendResult && sendResult.outputDir && <span>{t(locale, "outputDirectoryLabel")}: {sendResult.outputDir}</span>}
+          {"packagePath" in sendResult && sendResult.packagePath && <span>{t(locale, "packagePath")}: {sendResult.packagePath}</span>}
+          {"filesWritten" in sendResult && <span>{t(locale, "filesWrittenLabel")}: {sendResult.filesWritten.length}</span>}
           <span>{t(locale, "assetManifestHint")}</span>
         </div>
       )}
@@ -317,7 +343,7 @@ export function Popup(): JSX.Element {
         isSending={isSending}
         onClick={() => void handleSend()}
         label={effectiveDestination === "package" ? t(locale, "exportPackage") : t(locale, "importToCodex")}
-        sendingLabel={t(locale, "sending")}
+        sendingLabel={effectiveDestination === "package" ? t(locale, "exportingPackage") : t(locale, "sending")}
       />
     </main>
   );
@@ -356,7 +382,7 @@ function getDisabledReason(input: DisabledReasonInput): DisabledReason | undefin
     return "buttonDisabledChecking";
   }
 
-  if (input.bridgeStatus === "disconnected") {
+  if (input.bridgeStatus === "disconnected" && input.destination === "codex_project") {
     return "buttonDisabledBridgeDisconnected";
   }
 
@@ -383,14 +409,28 @@ function getDisabledReason(input: DisabledReasonInput): DisabledReason | undefin
   return undefined;
 }
 
-function triggerBrowserDownload(url: string): void {
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "";
-  link.rel = "noopener";
-  document.body.append(link);
-  link.click();
-  link.remove();
+async function exportPackageInBrowser(
+  payload: ImportChatGPTContextPayload,
+  fallbackMessage: string
+): Promise<BrowserPackageExportResult | { ok: false; message: string }> {
+  const response = await chrome.runtime.sendMessage({
+    type: "EXPORT_CONTEXT_PACKAGE",
+    payload
+  }) as { ok: true; filename: string; exportedBy: "extension" } | { ok: false; error?: { message?: string } } | undefined;
+
+  if (!response?.ok) {
+    return {
+      ok: false,
+      message: response?.error?.message || fallbackMessage
+    };
+  }
+
+  return {
+    ok: true,
+    mode: "package",
+    exportedBy: "extension",
+    filename: response.filename
+  };
 }
 
 function buildManualPayload(input: {

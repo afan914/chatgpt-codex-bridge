@@ -1,6 +1,6 @@
 # Browser Extension
 
-The extension popup reads the current ChatGPT conversation tab, shows a local status summary, and sends the extracted context to the local Bridge.
+The extension popup reads the current ChatGPT conversation tab, shows a local status summary, imports into Codex through the local Bridge, and exports zip packages directly from the browser.
 
 ## What It Does
 
@@ -9,8 +9,8 @@ The extension popup reads the current ChatGPT conversation tab, shows a local st
 - Detects asset references such as images, downloadable links, HTML code blocks, and Markdown code blocks.
 - Shows an asset summary in the popup.
 - Lets the user choose a destination:
-  - Import to Codex project
-  - Export as package
+  - Import to Codex project, which requires the local Bridge.
+  - Export as package, which uses browser-side JSZip generation and browser download.
 - Supports English / Chinese UI.
 
 ## Build
@@ -45,6 +45,24 @@ GET http://127.0.0.1:17321/projects
 POST http://127.0.0.1:17321/import-chatgpt-context
 ```
 
+These calls are required for Codex project import. Package export does not require the local service.
+
+When the local service is disconnected, the popup shows normal CLI guidance:
+
+```text
+Local service is not running.
+chatgpt-codex-bridge start
+chatgpt-codex-bridge install-service
+```
+
+It should not ask normal users to run `pnpm dev:bridge`.
+
+## Package Export
+
+The popup sends `EXPORT_CONTEXT_PACKAGE` to the background service worker. The service worker builds the zip with bundled `jszip` and calls `chrome.downloads.download`.
+
+The `downloads` permission is used only to save the generated context package zip. No CDN scripts are loaded.
+
 ## i18n
 
 The popup imports `t(locale, key)` and `Locale` from `@chatgpt-codex-bridge/shared`.
@@ -66,4 +84,5 @@ chatgptCodexBridge.selectedProjectId
 - DOM extraction may require updates if ChatGPT changes page structure.
 - Refresh the ChatGPT page after reloading the extension.
 - Some assets may be unresolved because blob URLs, protected URLs, and private ChatGPT backend resources cannot be saved by the Bridge.
+- Large data URL images may be skipped during browser-side package export and recorded as unresolved.
 - Unresolved and failed assets are still recorded in `assets_manifest.json`.

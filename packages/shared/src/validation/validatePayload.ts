@@ -232,7 +232,13 @@ function validateDestination(input: unknown): ValidationResult<ImportDestination
   }
 
   if (input.type === "package") {
-    return { ok: true, value: { type: "package" } };
+    return {
+      ok: true,
+      value: {
+        type: "package",
+        exportedBy: input.exportedBy === "extension" || input.exportedBy === "bridge" ? input.exportedBy : undefined
+      }
+    };
   }
 
   if (input.type === "codex_project") {

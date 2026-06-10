@@ -1,13 +1,13 @@
 {
-  "name": "chatgpt-codex-bridge",
-  "version": "0.1.0",
+  "name": "chatgpt-codex-bridge-workspace",
+  "version": "0.2.0",
   "private": true,
   "description": "Local bridge that sends ChatGPT conversation context into a Codex project directory.",
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev:bridge": "corepack pnpm --filter bridge dev",
-    "build:bridge": "corepack pnpm --filter bridge build",
+    "dev:bridge": "corepack pnpm --filter ./apps/bridge dev",
+    "build:bridge": "corepack pnpm --filter ./apps/bridge build",
     "build:extension": "corepack pnpm --filter extension build",
     "build": "corepack pnpm -r build",
     "typecheck": "corepack pnpm -r typecheck",

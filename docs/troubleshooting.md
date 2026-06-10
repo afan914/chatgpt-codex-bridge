@@ -2,10 +2,24 @@
 
 ## Local Service Disconnected
 
-Start the Bridge:
+If you only want to export a package, you can still use the extension without starting the Bridge. Choose `Export as package`; the browser will download the zip.
+
+Start the Bridge manually:
 
 ```bash
-pnpm dev:bridge
+chatgpt-codex-bridge start
+```
+
+Or enable auto-start:
+
+```bash
+chatgpt-codex-bridge install-service
+```
+
+Check status:
+
+```bash
+chatgpt-codex-bridge status
 ```
 
 Then test:
@@ -14,15 +28,137 @@ Then test:
 curl http://127.0.0.1:17321/health
 ```
 
+## Local service is not running, but I only want to export a package
+
+You can still export the current conversation as a package from the extension.
+
+Choose:
+
+```text
+Export as package
+```
+
+The package will be downloaded by the browser.
+
+To import directly into a Codex project, start the local service:
+
+```bash
+chatgpt-codex-bridge start
+```
+
+Or enable auto-start:
+
+```bash
+chatgpt-codex-bridge install-service
+```
+
+## Browser package export did not download
+
+Possible causes:
+
+1. Browser blocked the download.
+2. Extension does not have downloads permission.
+3. Zip generation failed.
+4. The conversation was not read successfully.
+5. Background service worker did not respond.
+
+Fix:
+
+1. Check browser download bar/history.
+2. Reload the extension.
+3. Refresh the ChatGPT page.
+4. Retry export.
+5. Inspect extension service worker logs.
+
+## Export package is very large
+
+Some conversations may contain large data URLs or generated assets.
+
+The extension may skip large data URL images and record them in `assets_manifest.json` as unresolved.
+
 ## Port `17321` Already in Use
 
-Another Bridge process may already be running. Stop it or edit:
+Another Bridge process may already be running. Check status, stop it, or edit:
 
 ```text
 ~/.chatgpt-codex-bridge/config.json
 ```
 
 The extension expects `127.0.0.1:17321`.
+
+## Auto-start Installation Failed
+
+The service is installed as the current user, not as an admin-level system service.
+
+Platform notes:
+
+1. macOS uses `~/Library/LaunchAgents/com.chatgpt-codex-bridge.plist`.
+2. Windows uses a user-level Task Scheduler task named `ChatGPTCodexBridge`.
+3. Linux uses `~/.config/systemd/user/chatgpt-codex-bridge.service` when systemd user mode is available.
+
+Run:
+
+```bash
+chatgpt-codex-bridge status
+```
+
+Then check logs under:
+
+```text
+~/.chatgpt-codex-bridge/logs/
+```
+
+## Service Installed but Extension Still Disconnected
+
+1. Run `chatgpt-codex-bridge status`.
+2. Test `curl http://127.0.0.1:17321/health`.
+3. Confirm the extension is configured for `127.0.0.1:17321`.
+4. Check `~/.chatgpt-codex-bridge/logs/bridge.err.log`.
+
+## Stale PID File
+
+The PID file is:
+
+```text
+~/.chatgpt-codex-bridge/bridge.pid
+```
+
+`chatgpt-codex-bridge start` removes stale PID files when the process is dead. If a live process is listed but health checks fail, inspect logs before starting another Bridge.
+
+## Log Files Are Too Large
+
+Logs rotate automatically at 10 MB and keep three rotated files:
+
+```text
+bridge.log
+bridge.log.1
+bridge.log.2
+bridge.log.3
+```
+
+## Uninstall Auto-start
+
+```bash
+chatgpt-codex-bridge uninstall-service
+```
+
+Config, exports, and project registry files are left intact.
+
+## macOS launchctl Compatibility
+
+Modern macOS generally uses `launchctl bootstrap` and `launchctl bootout`. Older versions may require `launchctl load` and `launchctl unload`; the CLI tries the modern command first and falls back to the legacy command.
+
+## Windows Task Scheduler Troubleshooting
+
+If `schtasks` fails, verify Task Scheduler is available for the current user. The CLI does not use the Startup folder as the primary auto-start mechanism.
+
+## Linux systemd User Service Troubleshooting
+
+Linux support requires systemd user mode. If `systemctl --user` is unavailable, use manual start:
+
+```bash
+chatgpt-codex-bridge start
+```
 
 ## No Codex Project Configured
 
@@ -59,14 +195,14 @@ If selection resets, reload the extension and confirm the latest version is runn
 
 Possible causes:
 
-1. Export directory is not writable.
+1. Browser download was blocked.
 2. Zip creation failed.
 3. Asset writing failed unexpectedly.
 
 Fix:
 
-1. Check Bridge terminal logs.
-2. Check `~/.chatgpt-codex-bridge/exports/`.
+1. Check browser downloads.
+2. Reload the extension.
 3. Retry export.
 
 ## Some Assets Are Unresolved

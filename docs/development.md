@@ -9,6 +9,42 @@ pnpm build:extension
 pnpm typecheck
 ```
 
+`pnpm dev:bridge` is for development. Normal usage should use the built CLI:
+
+```bash
+pnpm build
+pnpm --filter ./apps/bridge link --global
+chatgpt-codex-bridge start
+```
+
+The CLI package is prepared for future global npm installation:
+
+```bash
+npm install -g chatgpt-codex-bridge
+```
+
+Service commands:
+
+```bash
+chatgpt-codex-bridge status
+chatgpt-codex-bridge stop
+chatgpt-codex-bridge install-service
+chatgpt-codex-bridge uninstall-service
+```
+
+## Browser-side Package Export
+
+`Export as package` is implemented in the extension background service worker and always uses browser-side JSZip generation plus `chrome.downloads.download`.
+
+`Import to Codex project` still uses the local Bridge because it writes into configured local project paths.
+
+Manual checks:
+
+1. Stop Bridge and confirm Export as package remains enabled.
+2. Confirm Import to Codex project is disabled while Bridge is disconnected.
+3. Start Bridge and confirm Codex import still works.
+4. Confirm package export still downloads from the browser even when Bridge is connected.
+
 ## Project Registry Commands
 
 ```bash

@@ -1,17 +1,17 @@
-import os from "node:os";
 import path from "node:path";
 import { stat } from "node:fs/promises";
 import type { BridgeConfig, BridgeProject } from "@chatgpt-codex-bridge/shared";
 import { ensureDirectory, readJsonFile, writeJsonFile } from "../utils/fileSystem.js";
+import { getAppHome, getConfigPath as getRuntimeConfigPath } from "../runtime/paths.js";
 import { defaultBridgeConfig, isValidProjectId, validateBridgeConfig } from "./configSchema.js";
 import { discoverBridgeProjects } from "./projectDiscovery.js";
 
 export function getConfigDirectory(): string {
-  return path.join(os.homedir(), ".chatgpt-codex-bridge");
+  return getAppHome();
 }
 
 export function getConfigPath(): string {
-  return path.join(getConfigDirectory(), "config.json");
+  return getRuntimeConfigPath();
 }
 
 export async function loadBridgeConfig(): Promise<BridgeConfig> {

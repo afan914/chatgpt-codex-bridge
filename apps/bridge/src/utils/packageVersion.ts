@@ -12,8 +12,8 @@ export function readBridgeVersion(): string {
 
   try {
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8")) as PackageJson;
-    return packageJson.version ?? "0.1.0";
+    return packageJson.version ?? "0.2.0";
   } catch {
-    return "0.1.0";
+    return "0.2.0";
   }
 }

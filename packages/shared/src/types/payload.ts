@@ -28,7 +28,7 @@ export interface ChatGPTMessage {
 
 export type ImportDestination =
   | { type: "codex_project"; projectId?: string }
-  | { type: "package" };
+  | { type: "package"; exportedBy?: "extension" | "bridge" };
 
 export interface ImportChatGPTContextPayload {
   conversation: ConversationMetadata;
