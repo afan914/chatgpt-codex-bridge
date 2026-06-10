@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { BridgeConfig, ImportSuccessResponse } from "@chatgpt-codex-bridge/shared";
 import { validateImportPayload } from "@chatgpt-codex-bridge/shared";
-import { getProjectById, loadBridgeConfig } from "../../config/configStore.js";
+import { getProjectById, loadBridgeConfigWithDiscoveredProjects } from "../../config/configStore.js";
 import { exportAsPackage, importToCodexProject } from "../../writer/contextWriter.js";
 import { appendServiceLog } from "../../runtime/fileLogger.js";
 import { buildExportDownloadUrl } from "./downloadExport.js";
@@ -25,7 +25,7 @@ export async function handleImportChatGPTContext(
   }
 
   try {
-    const currentConfig = await loadBridgeConfig().catch(() => config);
+    const currentConfig = await loadBridgeConfigWithDiscoveredProjects().catch(() => config);
     const destination = validation.value.destination ?? { type: "codex_project" as const };
     const result =
       destination.type === "package"

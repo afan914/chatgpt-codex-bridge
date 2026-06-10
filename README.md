@@ -24,7 +24,7 @@ Milestone 5: Production CLI, persistent local service commands, and user-level a
 6. Extension extracts messages, code blocks, links, and asset references.
 7. Extension / Bridge saves supported assets, including snippets, HTML / Markdown artifacts, and supported small data URL images.
 8. Unresolved or failed assets are recorded in `assets_manifest.json`.
-9. You can import directly into a selected Codex project when the local Bridge is running.
+9. You can import directly into a detected or configured Codex project when the local Bridge is running.
 10. You can export a zip package from the browser even when the local Bridge is not running.
 
 ## Full Local Flow
@@ -68,6 +68,11 @@ If you want to import directly into a Codex project, do this one-time local serv
 pnpm build
 pnpm --filter ./apps/bridge link --global
 chatgpt-codex-bridge install-service
+```
+
+The Bridge automatically discovers common local project folders. If your project does not appear in the extension, add it manually:
+
+```bash
 chatgpt-codex-bridge project add <id> <path>
 ```
 
@@ -118,7 +123,7 @@ During local development only:
 pnpm dev:bridge
 ```
 
-Project registry commands:
+Manual project registry commands:
 
 ```bash
 chatgpt-codex-bridge project list
@@ -155,7 +160,7 @@ Duplicate imports overwrite the deterministic conversation folder for that proje
 ## Security Notes
 
 - The Bridge binds only to `127.0.0.1`.
-- The Bridge writes only inside explicitly configured project directories.
+- The Bridge writes only inside selected detected or configured project directories.
 - Browser-side package export only creates a downloaded zip; it does not write into arbitrary project folders.
 - Path traversal is rejected.
 - No conversation content is uploaded by this tool.

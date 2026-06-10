@@ -9,7 +9,7 @@ The extension popup reads the current ChatGPT conversation tab, shows a local st
 - Detects asset references such as images, downloadable links, HTML code blocks, and Markdown code blocks.
 - Shows an asset summary in the popup.
 - Lets the user choose a destination:
-  - Import to Codex project, which requires the local Bridge.
+  - Import to Codex project, which requires the local Bridge and a detected or configured project.
   - Export as package, which uses browser-side JSZip generation and browser download.
 - Supports English / Chinese UI.
 

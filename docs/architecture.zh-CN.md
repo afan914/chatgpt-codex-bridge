@@ -19,6 +19,7 @@
 Bridge 是一个本地 Node.js CLI 和 HTTP server。它负责：
 
 - 从 `~/.chatgpt-codex-bridge/config.json` 读取配置。
+- 自动发现常见位置下的本地项目，并合并手动配置的项目。
 - 监听 `127.0.0.1:17321`。
 - 处理 `/health`。
 - 处理 `/import-chatgpt-context`。

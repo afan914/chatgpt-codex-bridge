@@ -7,7 +7,7 @@
 ChatGPT DOM -> content script -> 扩展弹窗 -> background service worker -> 浏览器下载 zip
 
 导入 Codex 项目：
-ChatGPT DOM -> content script -> 扩展弹窗 -> 本地 Bridge -> 配置好的 Codex 项目 .codex-context/
+ChatGPT DOM -> content script -> 扩展弹窗 -> 本地 Bridge -> 自动发现或手动配置的 Codex 项目 .codex-context/
 ```
 
 ## 当前扩展能力

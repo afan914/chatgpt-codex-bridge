@@ -80,6 +80,11 @@ First-time setup:
 pnpm build
 pnpm --filter ./apps/bridge link --global
 chatgpt-codex-bridge install-service
+```
+
+The Bridge automatically discovers common local project folders. If your project does not appear in the extension, add it manually:
+
+```bash
 chatgpt-codex-bridge project add my-project /path/to/your/project
 ```
 

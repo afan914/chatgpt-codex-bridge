@@ -80,6 +80,11 @@ pnpm build:extension
 pnpm build
 pnpm --filter ./apps/bridge link --global
 chatgpt-codex-bridge install-service
+```
+
+Bridge 会自动发现常见位置下的本地项目。如果扩展里没有出现你的项目，再手动添加：
+
+```bash
 chatgpt-codex-bridge project add my-project /path/to/your/project
 ```
 

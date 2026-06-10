@@ -45,7 +45,9 @@ Manual checks:
 3. Start Bridge and confirm Codex import still works.
 4. Confirm package export still downloads from the browser even when Bridge is connected.
 
-## Project Registry Commands
+## Project Discovery and Registry Commands
+
+The Bridge automatically discovers common local project folders. Use registry commands when a project is not discovered or when you want a stable custom ID/default project.
 
 ```bash
 chatgpt-codex-bridge project list

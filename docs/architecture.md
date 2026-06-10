@@ -66,7 +66,7 @@ The Bridge is a local Node.js CLI and HTTP server. It:
 
 1. Validates payloads.
 2. Keeps `destination` backward-compatible and optional.
-3. Manages configured projects.
+3. Manages detected and configured projects.
 4. Resolves destination.
 5. Generates export folders.
 6. Writes conversation Markdown.
@@ -86,7 +86,7 @@ Browser-side export cannot write directly into arbitrary local project folders. 
 
 ## Asset Writer
 
-The asset writer only writes inside the selected context output directory, such as a configured Codex project export folder or the browser-side zip package structure. It saves content-based assets such as HTML and Markdown blocks, decodes supported data URL images, and records unresolved assets in `assets_manifest.json`.
+The asset writer only writes inside the selected context output directory, such as a detected/configured Codex project export folder or the browser-side zip package structure. It saves content-based assets such as HTML and Markdown blocks, decodes supported data URL images, and records unresolved assets in `assets_manifest.json`.
 
 ## Shared Package
 

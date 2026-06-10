@@ -60,7 +60,9 @@ Milestone 1 不会自动选择其他端口，因为扩展默认期望访问 `173
 
 ## 项目路径未配置
 
-如果要导入 Codex 项目，先添加项目：
+这只影响“导入到 Codex 项目”。“导出为上下文包”不需要项目配置。
+
+Bridge 会自动发现常见位置下的本地项目。如果扩展里没有出现你的项目，再手动添加：
 
 ```bash
 chatgpt-codex-bridge project add <id> /path/to/your/codex/project

@@ -164,7 +164,7 @@ chatgpt-codex-bridge start
 
 This only affects `Import to Codex project`. `Export as package` does not need a configured project.
 
-Fix:
+The Bridge automatically discovers common local project folders. If your project does not appear, add it manually:
 
 ```bash
 chatgpt-codex-bridge project add <id> <path>
@@ -177,7 +177,7 @@ The project list is only needed for direct Codex import. Package export can stil
 
 Possible causes:
 
-1. No project configured.
+1. No project was discovered or configured.
 2. Bridge is not running.
 3. `/projects` endpoint failed.
 

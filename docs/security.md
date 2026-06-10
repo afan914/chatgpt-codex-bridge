@@ -2,16 +2,16 @@
 
 ## Local-only Bridge Model
 
-The Bridge listens only on `127.0.0.1`. It must never listen on `0.0.0.0` because it can write files into configured project directories.
+The Bridge listens only on `127.0.0.1`. It must never listen on `0.0.0.0` because it can write files into selected local project directories.
 
 Auto-start does not introduce a remote server. The Bridge still binds only to the loopback interface.
 
 ## Project Registry Security
 
-1. Bridge only writes to explicitly configured project paths.
-2. Service installation does not scan local Codex projects.
-3. Project paths are configured by the user.
-4. The extension only receives the configured project list from the local Bridge.
+1. Bridge only writes to project paths selected by the user from detected or configured projects.
+2. Service installation itself does not scan local Codex projects.
+3. Project paths may be detected from common local project folders or configured manually by the user.
+4. The extension receives the detected/configured project list from the local Bridge.
 
 ## Service Mode Security
 
@@ -45,7 +45,7 @@ Logs should include service lifecycle and import/export summaries only. They mus
 ## Asset Security
 
 1. Assets may contain private or sensitive content.
-2. Saved assets are written locally into the configured project directory or exported package.
+2. Saved assets are written locally into the selected detected/configured project directory or exported package.
 3. Nothing is uploaded to remote services.
 4. Users should review generated assets before committing to public repositories.
 
@@ -59,7 +59,7 @@ Logs should include service lifecycle and import/export summaries only. They mus
 ## Path Safety
 
 1. Asset filenames are sanitized.
-2. Asset files are only written inside the selected context output, such as a configured Codex project folder or the browser-generated zip package.
+2. Asset files are only written inside the selected context output, such as a detected/configured Codex project folder or the browser-generated zip package.
 3. Path traversal is blocked.
 
 ## Browser Extension Permissions
